@@ -2,5 +2,12 @@
 // We suggest you to commit this file into source control
 declare global {
   const browser: typeof import('webextension-polyfill')['default']
+  const useState: typeof import('react')['useState']
+  const useCallback: typeof import('react')['useCallback']
+  const useMemo: typeof import('react')['useMemo']
+  const useEffect: typeof import('react')['useEffect']
+  const useRef: typeof import('react')['useRef']
+  const useContext: typeof import('react')['useContext']
+  const useReducer: typeof import('react')['useReducer']
 }
 export {}

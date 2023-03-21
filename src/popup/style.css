@@ -1,8 +1,8 @@
-@tailwind base;
+/* @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; */
 
-@keyframes Spin {
+/* @keyframes Spin {
   from {
     transform: rotate(0deg);
   }
@@ -39,4 +39,4 @@
 
 button {
   font-size: calc(10px + 2vmin);
-}
+} */

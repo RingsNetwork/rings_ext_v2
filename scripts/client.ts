@@ -1,6 +1,6 @@
 import type { ErrorPayload, HMRPayload, Update } from 'vite'
-import type { ViteHotContext } from 'vite/types/hot'
 import type { InferCustomEventPayload } from 'vite/types/customEvent'
+import type { ViteHotContext } from 'vite/types/hot'
 // Vite v3 doesn't export overlay
 // import { ErrorOverlay, overlayId } from 'vite/src/client/overlay'
 
@@ -19,6 +19,12 @@ const pruneMap = new Map<string, (data: any) => void | Promise<void>>()
 const dataMap = new Map<string, any>()
 const customListenersMap = new Map<string, ((data: any) => void)[]>()
 const ctxToListenersMap = new Map<string, Map<string, ((data: any) => void)[]>>()
+
+declare global {
+  interface Document {
+    adoptedStyleSheets: any[]
+  }
+}
 
 let socket: WebSocket
 try {
@@ -46,7 +52,7 @@ function warnFailedFetch(err: Error, path: string | string[]) {
   console.error(
     `[hmr] Failed to reload ${path}. ` +
       'This could be due to syntax errors or importing non-existent ' +
-      'modules. (see errors above)',
+      'modules. (see errors above)'
   )
 }
 
@@ -92,12 +98,10 @@ async function handleMessage(payload: HMRPayload) {
           // using relative paths so we need to use link.href to grab the full
           // URL for the include check.
           const el = Array.from(document.querySelectorAll<HTMLLinkElement>('link')).find((e) =>
-            cleanUrl(e.href).includes(searchUrl),
+            cleanUrl(e.href).includes(searchUrl)
           )
           if (el) {
-            const newPath = `${base}${searchUrl.slice(1)}${
-              searchUrl.includes('?') ? '&' : '?'
-            }t=${timestamp}`
+            const newPath = `${base}${searchUrl.slice(1)}${searchUrl.includes('?') ? '&' : '?'}t=${timestamp}`
             el.href = new URL(newPath, el.href).href
           }
           console.log(`[vite] css hot updated: ${searchUrl}`)
@@ -256,9 +260,7 @@ export function removeStyle(id: string): void {
   const style = sheetsMap.get(id)
   if (style) {
     if (style instanceof CSSStyleSheet)
-      document.adoptedStyleSheets = document.adoptedStyleSheets.filter(
-        (s: CSSStyleSheet) => s !== style,
-      )
+      document.adoptedStyleSheets = document.adoptedStyleSheets.filter((s: CSSStyleSheet) => s !== style)
     else document.head.removeChild(style)
 
     sheetsMap.delete(id)
@@ -317,7 +319,7 @@ async function fetchUpdate({ path, acceptedPath, timestamp }: Update) {
       } catch (e: any) {
         warnFailedFetch(e, dep)
       }
-    }),
+    })
   )
 
   return () => {
@@ -367,7 +369,7 @@ export function createHotContext(ownerPath: string): ViteHotContext {
       if (listeners) {
         customListenersMap.set(
           event,
-          listeners.filter((l) => !staleFns.includes(l)),
+          listeners.filter((l) => !staleFns.includes(l))
         )
       }
     }

@@ -1,9 +1,14 @@
 /* eslint-disable no-console */
-import { onMessage } from 'webext-bridge'
-import { App } from './views/App'
 import { createRoot } from 'react-dom/client'
+import { onMessage } from 'webext-bridge'
+
+import { App } from './views/App'
+
+import '@unocss/reset/tailwind.css'
+import 'uno.css'
 
 // Firefox `browser.tabs.executeScript()` requires scripts return a primitive value
+// eslint-disable-next-line import/newline-after-import
 ;(() => {
   console.info('[webext-template] Hello world from content script')
 

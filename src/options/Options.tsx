@@ -1,5 +1,3 @@
-import React from 'react'
-
 export const Options = () => {
-  return <div>Options</div>
+  return <div className="px-2 pt-4 text-base font-bold">Options</div>
 }
