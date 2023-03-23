@@ -8,21 +8,20 @@
     "extension",
     "chrome",
     "firefox",
-    "aiou",
     "template"
   ],
   "license": "MIT",
   "packageManager": "pnpm@7.23.0",
-  "homepage": "https://github.com/spring-catponents/webext-template",
+  "homepage": "https://github.com/RingsNetwork/ext_v2",
   "repository": {
     "type": "git",
-    "url": "https://github.com/spring-catponents/webext-template"
+    "url": "https://github.com/RingsNetwork/ext_v2"
   },
   "bugs": {
-    "url": "https://github.com/spring-catponents/webext-template/issues",
+    "url": "https://github.com/RingsNetwork/ext_v2/issues",
     "email": "jiangweixian1994@gmail.com"
   },
-  "author": "JW <jiangweixian1994@gmail.com> (https://twitter.com/jiangweixian)",
+  "author": "RingsNetwork",
   "scripts": {
     "dev": "npm run clear && cross-env NODE_ENV=development run-p dev:*",
     "dev:bg": "tsup --watch ./src",
