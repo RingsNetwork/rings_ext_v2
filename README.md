@@ -1,13 +1,6 @@
-# @aiou/webext-template
-*a fork version of [vitesse-webext](https://github.com/antfu/vitesse-webext), but with react*
+# ext-v2
 
-*thanks to awesome work https://github.com/xlzy520/vitesse-webext/tree/refactor/mv3 support chrome manifest v3*
-
-A [Vite](https://vitejs.dev/) powered WebExtension ([Chrome](https://developer.chrome.com/docs/extensions/reference/), [FireFox](https://addons.mozilla.org/en-US/developers/), etc.) starter template.
-
-[![npm](https://img.shields.io/npm/v/@aiou/webext-template)](https://github.com/spring-catponents/webext-template) [![GitHub](https://img.shields.io/github/license/spring-catponents/webext-template)](https://github.com/spring-catponents/webext-template) [![stackblitz](https://img.shields.io/badge/%E2%9A%A1%EF%B8%8Fstackblitz-online-blue)](https://github.com/spring-catponents/webext-template)
-
-[Edit on StackBlitz ⚡️](https://stackblitz.com/github/JiangWeixian/templates/tree/master/packages/webext-template)
+- nodejs >= 16
 
 ## Features
 
@@ -77,10 +70,3 @@ pnpm build
 ```
 
 And then pack files under `extension`, you can upload `extension.crx` or `extension.xpi` to appropriate extension store.
-
-# 
-<div align='right'>
-
-*built with ❤️ by [😼](https://github.com/spring-catponents/templates)*
-
-</div>
