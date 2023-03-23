@@ -22,11 +22,16 @@ import 'uno.css'
   const root = document.createElement('div')
   container.className = 'webext-template'
   const styleEl = document.createElement('link')
+  const scriptEl = document.createElement('script')
+  scriptEl.innerHTML = ` setTimeout(() => {
+    console.log((window as any)!.ethereum)
+  }, 1000)`
   const shadowDOM = container.attachShadow?.({ mode: __DEV__ ? 'open' : 'closed' }) || container
   styleEl.setAttribute('rel', 'stylesheet')
   styleEl.setAttribute('href', browser.runtime.getURL('dist/contentScripts/style.css'))
   shadowDOM.appendChild(styleEl)
   shadowDOM.appendChild(root)
+  shadowDOM.appendChild(scriptEl)
   document.body.appendChild(container)
   const $root = createRoot(root)
   $root.render(<App />)
