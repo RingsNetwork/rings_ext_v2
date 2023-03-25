@@ -24,7 +24,7 @@ import 'uno.css'
   const styleEl = document.createElement('link')
   const scriptEl = document.createElement('script')
   scriptEl.innerHTML = ` setTimeout(() => {
-    console.log((window as any)!.ethereum)
+    console.log(window.ethereum)
   }, 1000)`
   const shadowDOM = container.attachShadow?.({ mode: __DEV__ ? 'open' : 'closed' }) || container
   styleEl.setAttribute('rel', 'stylesheet')

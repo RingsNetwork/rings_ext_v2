@@ -1,6 +1,7 @@
-import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import { useAccount, useBlockNumber, useConnect, useDisconnect } from 'wagmi'
 
 export function Popup() {
+  const { data } = useBlockNumber({ watch: true })
   const { address, isConnected } = useAccount()
   const { connect, connectors, error, isLoading, pendingConnector } = useConnect()
 
@@ -10,6 +11,7 @@ export function Popup() {
     <div className="container w-358px h-600px flex-col-center">
       <div className="w-full h-full">
         <div className="text-base">Account: {address}</div>
+        <div>Block number: {data}</div>
         <div>
           {connectors.map((connector) => (
             <button
