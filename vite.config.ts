@@ -58,6 +58,9 @@ export const sharedConfig: UserConfig = {
   ],
   optimizeDeps: {
     include: ['webextension-polyfill'],
+    esbuildOptions: {
+      target: 'es2020',
+    },
   },
 }
 
@@ -72,6 +75,7 @@ export default defineConfig(({ command }) => {
       },
     },
     build: {
+      target: 'es2020',
       outDir: r('extension/dist'),
       emptyOutDir: false,
       sourcemap: isDev ? 'inline' : false,

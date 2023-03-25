@@ -1,8 +1,9 @@
 // generate stub index.html files for dev entry
 import { execSync } from 'child_process'
-import fs from 'fs-extra'
 import chokidar from 'chokidar'
-import { r, port, isDev, log } from './utils'
+import fs from 'fs-extra'
+
+import { isDev, log, port, r } from './utils'
 
 /**
  * Stub index.html to use Vite in development
@@ -17,10 +18,7 @@ async function stubIndexHtml() {
       .replace(/".\/main.(tsx?)"/g, (_match, p1) => {
         return `"http://localhost:${port}/${view}/main.${p1}"`
       })
-      .replace(
-        /<!-- hmr -->/g,
-        `<script type="module" src="http://localhost:${port}/hmr.ts"></script>`,
-      )
+      .replace(/<!-- hmr -->/g, `<script type="module" src="http://localhost:${port}/hmr.ts"></script>`)
       .replace('<div id="root"></div>', '<div id="root">Vite server did not start</div>')
     await fs.writeFile(r(`extension/dist/${view}/index.html`), data, 'utf-8')
     log('PRE', `stub ${view}`)
