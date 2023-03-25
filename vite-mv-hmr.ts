@@ -1,6 +1,7 @@
+import fs from 'fs-extra'
 import { dirname, join } from 'path'
 import type { HMRPayload, PluginOption } from 'vite'
-import fs from 'fs-extra'
+
 import { isWin, r } from './scripts/utils'
 
 const targetDir = r('extension')
@@ -47,10 +48,7 @@ export const MV3Hmr = (): PluginOption => {
           for (const mod of importedModules) {
             code = code.replace(
               mod.url,
-              normalizeViteUrl(
-                isWin ? mod.url.replace(/[A-Z]:\//, '').replace(/:/, '.') : mod.url,
-                mod.type,
-              ),
+              normalizeViteUrl(isWin ? mod.url.replace(/[A-Z]:\//, '').replace(/:/, '.') : mod.url, mod.type)
             ) // fix invalid colon in /@fs/C:, /@id/plugin-vue:export-helper
             writeToDisk(mod.url)
           }
@@ -72,16 +70,14 @@ export const MV3Hmr = (): PluginOption => {
 
           const targetFile = normalizeFsUrl(
             isWin ? urlModule.url.replace(/[A-Z]:\//, '').replace(/:/, '.') : urlModule.url,
-            urlModule.type,
+            urlModule.type
           ) // fix invalid colon in /@fs/C:, /@id/plugin-vue:export-helper
           await fs.ensureDir(dirname(targetFile))
           await fs.writeFile(targetFile, code)
         }
       }
 
-      Object.keys(server.config.build.rollupOptions.input!).map((entry) =>
-        writeToDisk(`/${entry}/main.ts`),
-      )
+      Object.keys(server.config.build.rollupOptions.input!).map((entry) => writeToDisk(`/${entry}/main.ts`))
     },
   }
 }
@@ -89,8 +85,7 @@ export const MV3Hmr = (): PluginOption => {
 function normalizeViteUrl(url: string, type: string) {
   url = url.replace(/\?v=\w+$/, '')
 
-  if (type === 'js' && !url.endsWith('.js') && !url.endsWith('.mjs'))
-    url = `${url}.js`.replace(/vue\?/, 'vue.js_')
+  if (type === 'js' && !url.endsWith('.js') && !url.endsWith('.mjs')) url = `${url}.js`.replace(/vue\?/, 'vue.js_')
 
   return url
 }
@@ -104,6 +99,6 @@ function normalizeFsUrl(url: string, type: string) {
       // eslint-disable-next-line no-control-regex
       .replace(/\u0000/g, '__x00__')
       // filenames starting with "_" are reserved for use by the system.
-      .replace(/^_+/, (match) => '~'.repeat(match.length)),
+      .replace(/^_+/, (match) => '~'.repeat(match.length))
   )
 }

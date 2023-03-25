@@ -51,8 +51,13 @@
     ]
   },
   "dependencies": {
+    "@metamask/providers": "^9.1.0",
     "@unocss/reset": "^0.50.6",
+    "buffer": "^6.0.3",
     "document-ready": "^2.0.2",
+    "events": "^3.3.0",
+    "metamask-extension-provider": "^3.0.0",
+    "process": "^0.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
@@ -83,6 +88,7 @@
     "husky": "^7.0.0",
     "kolorist": "^1.5.0",
     "lint-staged": "^11.1.2",
+    "node-stdlib-browser": "^1.2.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.8.6",
     "rimraf": "^3.0.2",
@@ -94,6 +100,7 @@
     "vite": "^3.2.4",
     "vite-plugin-checker": "~0.4.9",
     "vite-plugin-eslint": "^1.8.1",
+    "vite-plugin-node-stdlib-browser": "^0.2.1",
     "web-ext": "^6.3.0",
     "webext-bridge": "^4.1.1",
     "webextension-polyfill": "^0.8.0"

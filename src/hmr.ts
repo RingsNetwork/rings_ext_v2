@@ -1,5 +1,6 @@
 // @ts-nocheck
 import RefreshRuntime from '/@react-refresh'
+
 RefreshRuntime.injectIntoGlobalHook(window)
 window.$RefreshReg$ = () => {}
 window.$RefreshSig$ = () => (type) => type

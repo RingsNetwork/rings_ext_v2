@@ -6,6 +6,7 @@ import type { UserConfig } from 'vite'
 import { defineConfig } from 'vite'
 import Checker from 'vite-plugin-checker'
 import EslintPlugin from 'vite-plugin-eslint'
+import nodePolyfills from 'vite-plugin-node-stdlib-browser'
 
 import { isDev, port, r } from './scripts/utils'
 import { MV3Hmr } from './vite-mv-hmr'
@@ -36,7 +37,6 @@ export const sharedConfig: UserConfig = {
       typescript: true,
     }),
     EslintPlugin(),
-    // @ts-expect-error -- rollup conflict with tsup rollup
     replace({
       preventAssignment: true,
       values: {
@@ -54,6 +54,7 @@ export const sharedConfig: UserConfig = {
         return html.replace(/"\/assets\//g, '"../assets/')
       },
     },
+    nodePolyfills(),
   ],
   optimizeDeps: {
     include: ['webextension-polyfill'],
