@@ -1,6 +1,6 @@
 # ext-v2
 
-- nodejs >= 16
+- **Nodejs** >= v16.13.0
 
 ## Features
 

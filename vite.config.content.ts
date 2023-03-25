@@ -7,7 +7,7 @@ import { sharedConfig } from './vite.config'
 export default defineConfig({
   ...sharedConfig,
   build: {
-    target: 'es2020',
+    // target: 'es2020',
     watch: isDev
       ? {
           include: [r('src/contentScripts/**/*')],
