@@ -1,5 +1,7 @@
 import { useAccount, useBlockNumber, useConnect, useDisconnect } from 'wagmi'
 
+import { NetworkSwitcher } from './components/SwitchNetworks'
+
 export function Popup() {
   const { data } = useBlockNumber({ watch: true })
   const { address, isConnected } = useAccount()
@@ -38,6 +40,8 @@ export function Popup() {
 
         {error && <div>{error.message}</div>}
       </div>
+
+      <NetworkSwitcher />
     </div>
   )
 }

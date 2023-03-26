@@ -23,9 +23,7 @@ import 'uno.css'
   container.className = 'webext-template'
   const styleEl = document.createElement('link')
   const scriptEl = document.createElement('script')
-  scriptEl.innerHTML = ` setTimeout(() => {
-    console.log(window.ethereum)
-  }, 1000)`
+  scriptEl.setAttribute('src', browser.runtime.getURL('dist/contentScripts/sdk.js'))
   const shadowDOM = container.attachShadow?.({ mode: __DEV__ ? 'open' : 'closed' }) || container
   styleEl.setAttribute('rel', 'stylesheet')
   styleEl.setAttribute('href', browser.runtime.getURL('dist/contentScripts/style.css'))
