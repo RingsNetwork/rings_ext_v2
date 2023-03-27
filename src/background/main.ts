@@ -35,11 +35,21 @@ onMessage('get-current-tab', async () => {
   try {
     const tab = await browser.tabs.get(previousTabId)
     return {
-      title: tab?.id,
+      title: `${tab?.id ?? ''}`,
     }
   } catch {
     return {
-      title: undefined,
+      title: '',
     }
   }
 })
+
+onMessage('emit-nodes', async ({ data }) => {
+  getNodeInfo()
+  console.log(data)
+  return { nodes: [1, 2] }
+})
+
+function getNodeInfo() {
+  console.log('getNodeInfo')
+}

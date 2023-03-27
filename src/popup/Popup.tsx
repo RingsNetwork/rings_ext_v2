@@ -1,4 +1,5 @@
 import { useAccount, useBlockNumber, useConnect, useDisconnect } from 'wagmi'
+import { sendMessage } from 'webext-bridge'
 
 import { NetworkSwitcher } from './components/SwitchNetworks'
 
@@ -42,6 +43,18 @@ export function Popup() {
       </div>
 
       <NetworkSwitcher />
+      <button
+        className="w-120px flex-col-center h-10 rounded bg-blue-600 text-sm text-white"
+        onClick={async () => {
+          console.log('123')
+          const data = await sendMessage('emit-nodes', {
+            list: 1,
+          })
+          console.log(data)
+        }}
+      >
+        Get bg
+      </button>
     </div>
   )
 }
