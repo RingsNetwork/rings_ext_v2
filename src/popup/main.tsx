@@ -5,8 +5,9 @@ import { arbitrum, arbitrumGoerli, bsc, bscTestnet, goerli, mainnet, polygon } f
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
 import { publicProvider } from 'wagmi/providers/public'
 
+import { metamaskProvider } from '~/provider'
+
 import { Popup } from './Popup'
-import { metamaskProvider } from './utils/index'
 
 import '@unocss/reset/tailwind.css'
 import 'uno.css'
