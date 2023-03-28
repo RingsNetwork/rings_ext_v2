@@ -1,5 +1,5 @@
 import init, { Client, UnsignedInfo } from '@ringsnetwork/rings-node'
-import { onMessage, sendMessage } from 'webext-bridge'
+import { onMessage, sendMessage } from 'webext-bridge/background'
 import type { Tabs } from 'webextension-polyfill'
 import browser from 'webextension-polyfill'
 
@@ -48,8 +48,12 @@ onMessage('get-current-tab', async () => {
 })
 
 let wasmInit: any = null
+let client: Client | null = null
 
 const createRingsNodeClient = async ({ turnUrl, account }: { turnUrl: string; account: string }) => {
+  if (client) {
+    return
+  }
   // init wasm
   if (!wasmInit) {
     wasmInit = await init(browser.runtime.getURL('dist/background/rings_node_bg.wasm'))
@@ -62,14 +66,13 @@ const createRingsNodeClient = async ({ turnUrl, account }: { turnUrl: string; ac
     {
       auth: unsignedInfo.auth,
     },
-    {
-      context: 'popup',
-      tabId: 1,
-    }
+    'popup'
   )
   const signature = new Uint8Array(hexToBytes(signed))
 
-  return await Client.new_client(unsignedInfo, signature, turnUrl)
+  let client_ = await Client.new_client(unsignedInfo, signature, turnUrl)
+  client = client_
+  return client_
 }
 
 // Provider
@@ -99,5 +102,11 @@ const createRingsNodeClient = async ({ turnUrl, account }: { turnUrl: string; ac
 onMessage('connect-metamask', async ({ data }) => {
   const client = await createRingsNodeClient(data)
 
-  return client
+  const connected = await client.connect_peer_via_http('https://41d.1n.gs')
+  console.log(connected)
+  const info = await client.get_node_info()
+  console.log(info)
+  return {
+    address: client!.address,
+  }
 })

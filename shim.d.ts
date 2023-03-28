@@ -6,10 +6,15 @@ declare module 'webext-bridge' {
     // see https://github.com/antfu/webext-bridge#type-safe-protocols
     'tab-prev': { title: string | undefined }
     'get-current-tab': ProtocolWithReturn<{ tabId: number }, { title: string }>
-    'connect-metamask': {
-      account: string
-      turnUrl: string
-    }
+    'connect-metamask': ProtocolWithReturn<
+      {
+        account: string
+        turnUrl: string
+      },
+      {
+        address: string
+      }
+    >
     'sign-message': ProtocolWithReturn<{ auth: string }, { signed: string }>
   }
 }

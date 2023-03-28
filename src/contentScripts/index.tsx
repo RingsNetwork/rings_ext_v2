@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { WindowPostMessageStream } from '@metamask/post-message-stream'
 import { createRoot } from 'react-dom/client'
-import { onMessage } from 'webext-bridge'
+import { onMessage } from 'webext-bridge/content-script'
 
 import { App } from './views/App'
 

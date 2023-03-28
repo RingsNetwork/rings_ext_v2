@@ -1,6 +1,6 @@
 import { useAccount, useBlockNumber, useConnect, useDisconnect } from 'wagmi'
 import { signMessage } from 'wagmi/actions'
-import { onMessage, sendMessage } from 'webext-bridge'
+import { onMessage, sendMessage } from 'webext-bridge/popup'
 
 import { NetworkSwitcher } from './components/SwitchNetworks'
 
