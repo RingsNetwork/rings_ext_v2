@@ -18,12 +18,13 @@ export default defineConfig({
     emptyOutDir: false,
     sourcemap: isDev ? 'inline' : false,
     lib: {
-      entry: r('src/contentScripts/index.tsx'),
+      entry: r('src/contentScripts/sdk.ts'),
       formats: ['es'],
+      name: 'ringsNode',
     },
     rollupOptions: {
       output: {
-        entryFileNames: 'index.global.js',
+        entryFileNames: 'sdk.js',
       },
     },
   },

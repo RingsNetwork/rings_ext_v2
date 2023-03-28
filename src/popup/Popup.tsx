@@ -1,5 +1,6 @@
 import { useAccount, useBlockNumber, useConnect, useDisconnect } from 'wagmi'
-import { sendMessage } from 'webext-bridge'
+import { signMessage } from 'wagmi/actions'
+import { onMessage, sendMessage } from 'webext-bridge'
 
 import { NetworkSwitcher } from './components/SwitchNetworks'
 
@@ -9,6 +10,18 @@ export function Popup() {
   const { connect, connectors, error, isLoading, pendingConnector } = useConnect()
 
   const { disconnect } = useDisconnect()
+
+  useEffect(() => {
+    onMessage('sign-message', async ({ data }) => {
+      const signed = await signMessage({
+        message: data.auth,
+      })
+
+      return {
+        signed,
+      }
+    })
+  }, [])
 
   return (
     <div className="container w-358px h-600px flex-col-center">
@@ -46,11 +59,14 @@ export function Popup() {
       <button
         className="w-120px flex-col-center h-10 rounded bg-blue-600 text-sm text-white"
         onClick={async () => {
-          console.log('123')
-          const data = await sendMessage('emit-nodes', {
-            list: 1,
-          })
-          console.log(data)
+          if (address) {
+            const data = await sendMessage('connect-metamask', {
+              account: address,
+              turnUrl: 'stun://stun.qq.com:3478',
+            })
+
+            console.log(data)
+          }
         }}
       >
         Get bg

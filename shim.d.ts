@@ -6,5 +6,23 @@ declare module 'webext-bridge' {
     // see https://github.com/antfu/webext-bridge#type-safe-protocols
     'tab-prev': { title: string | undefined }
     'get-current-tab': ProtocolWithReturn<{ tabId: number }, { title: string }>
+    'connect-metamask': {
+      account: string
+      turnUrl: string
+    }
+    'sign-message': ProtocolWithReturn<{ auth: string }, { signed: string }>
+  }
+}
+
+declare module '@metamask/post-message-stream' {
+  interface WindowPostMessageStream<P = any, D = any> {
+    on: (type: 'data' | 'error', cb: (data: D) => void) => void
+    write: (data: P) => boolean
+  }
+}
+
+declare global {
+  interface Window {
+    ringsNode: any
   }
 }

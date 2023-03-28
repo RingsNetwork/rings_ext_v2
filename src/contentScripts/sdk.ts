@@ -1,5 +1,17 @@
-;(window as any).fisand = (name: string) => {
-  console.log(`@fisand: hello, ${name}`)
-}
+import { WindowPostMessageStream } from '@metamask/post-message-stream'
 
-export {}
+const CONTENT_SCRIPT = 'fisand-contentscript'
+const INPAGE = 'fisand-inpage'
+
+const fisandStream = new WindowPostMessageStream({
+  name: INPAGE,
+  target: CONTENT_SCRIPT,
+})
+
+fisandStream.on('data', (message) => {
+  console.log(message)
+})
+
+window.ringsNode = {
+  connectionStream: fisandStream,
+}

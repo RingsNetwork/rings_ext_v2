@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { WindowPostMessageStream } from '@metamask/post-message-stream'
 import { createRoot } from 'react-dom/client'
 import { onMessage } from 'webext-bridge'
 
@@ -6,6 +7,28 @@ import { App } from './views/App'
 
 import '@unocss/reset/tailwind.css'
 import 'uno.css'
+
+const CONTENT_SCRIPT = 'fisand-contentscript'
+const INPAGE = 'fisand-inpage'
+
+const setupPageStream = () => {
+  const pageStream = new WindowPostMessageStream({
+    name: CONTENT_SCRIPT,
+    target: INPAGE,
+  })
+
+  pageStream.on('data', (data) => {
+    console.log(data + ', world')
+    setTimeout(() => {
+      pageStream.write('callback')
+    }, 1500)
+  })
+}
+
+// init stream
+;(() => {
+  setupPageStream()
+})()
 
 // Firefox `browser.tabs.executeScript()` requires scripts return a primitive value
 // eslint-disable-next-line import/newline-after-import
@@ -23,10 +46,12 @@ import 'uno.css'
   container.className = 'webext-template'
   const styleEl = document.createElement('link')
   const scriptEl = document.createElement('script')
-  scriptEl.setAttribute('src', browser.runtime.getURL('dist/contentScripts/sdk.js'))
   const shadowDOM = container.attachShadow?.({ mode: __DEV__ ? 'open' : 'closed' }) || container
+
+  scriptEl.setAttribute('src', browser.runtime.getURL('dist/contentScripts/sdk.js'))
   styleEl.setAttribute('rel', 'stylesheet')
   styleEl.setAttribute('href', browser.runtime.getURL('dist/contentScripts/style.css'))
+
   shadowDOM.appendChild(styleEl)
   shadowDOM.appendChild(root)
   shadowDOM.appendChild(scriptEl)

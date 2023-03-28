@@ -10,16 +10,17 @@ export default defineConfig({
     // target: 'es2020',
     watch: isDev
       ? {
-          include: [r('src/contentScripts/**/*')],
+          include: [r('src/background/**/*')],
         }
       : undefined,
-    outDir: r('extension/dist/contentScripts'),
+    outDir: r('extension/dist/background'),
     cssCodeSplit: false,
     emptyOutDir: false,
     sourcemap: isDev ? 'inline' : false,
     lib: {
-      entry: r('src/contentScripts/index.tsx'),
-      formats: ['es'],
+      entry: r('src/background/main.ts'),
+      formats: ['iife'],
+      name: 'ringsNode',
     },
     rollupOptions: {
       output: {

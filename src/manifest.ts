@@ -25,7 +25,7 @@ export async function getManifest() {
       chrome_style: false,
     },
     background: {
-      service_worker: './dist/background/index.mjs',
+      service_worker: './dist/background/index.global.js',
     },
     icons: {
       16: './assets/icon-512.png',
@@ -40,11 +40,15 @@ export async function getManifest() {
         js: ['./dist/contentScripts/index.global.js'],
       },
     ],
-    web_accessible_resources: ['dist/contentScripts/style.css', 'dist/contentScripts/sdk.js'],
+    web_accessible_resources: [
+      'dist/contentScripts/style.css',
+      'dist/contentScripts/sdk.js',
+      'dist/background/rings_node_bg.wasm',
+    ],
     content_security_policy: isDev
       ? // this is required on dev for Vite script to load
-        `script-src 'self' http://localhost:${port}; object-src 'self' http://localhost:${port}`
-      : "script-src 'self'; object-src 'self'",
+        `script-src 'self' 'unsafe-eval' http://localhost:${port}; object-src 'self' http://localhost:${port}`
+      : "script-src 'self' 'unsafe-eval'; object-src 'self'",
   }
 
   if (isDev) {
