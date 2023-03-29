@@ -13,7 +13,10 @@
     "chrome_style": false
   },
   "background": {
-    "service_worker": "./dist/background/index.global.js"
+    "scripts": [
+      "./dist/background/index.global.js"
+    ],
+    "persistent": true
   },
   "icons": {
     "16": "./assets/icon-512.png",
@@ -28,8 +31,12 @@
     "mediaGalleries",
     "pointerLock",
     "geolocation",
-    "audioCapture",
+    "desktopCapture",
     "videoCapture",
+    "audioCapture",
+    "webRequest",
+    "webRequestBlocking",
+    "webRTC",
     "https://41d.1n.gs/",
     "http://*/",
     "https://*/"

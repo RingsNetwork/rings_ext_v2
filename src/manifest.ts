@@ -25,28 +25,15 @@ export async function getManifest() {
       chrome_style: false,
     },
     background: {
-      service_worker: './dist/background/index.global.js',
+      scripts: ['./dist/background/index.global.js'],
+      persistent: true,
     },
     icons: {
       16: './assets/icon-512.png',
       48: './assets/icon-512.png',
       128: './assets/icon-512.png',
     },
-    permissions: [
-      'tabs',
-      'storage',
-      'activeTab',
-      'tabCapture',
-      'mediaGalleries',
-      'pointerLock',
-      'geolocation',
-      'audioCapture',
-      'videoCapture',
-      // 'internalScreencast',
-      'https://41d.1n.gs/',
-      'http://*/',
-      'https://*/',
-    ],
+    permissions: ['tabs', 'storage', 'activeTab', 'http://*/', 'https://*/'],
     // host_permissions: ['*://*/*'],
     content_scripts: [
       {

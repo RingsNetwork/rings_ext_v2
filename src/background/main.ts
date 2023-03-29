@@ -32,6 +32,14 @@ const createRingsNodeClient = async ({ turnUrl, account }: { turnUrl: string; ac
   )
   const signature = new Uint8Array(hexToBytes(signed))
 
+  console.log({
+    account,
+    turnUrl,
+    signed,
+    auth: unsignedInfo.auth,
+    signature,
+  })
+
   let client_: Client = await Client.new_client(unsignedInfo, signature, turnUrl)
   client = client_
   return client_
@@ -62,7 +70,12 @@ const createRingsNodeClient = async ({ turnUrl, account }: { turnUrl: string; ac
 
 // init client
 onMessage('connect-metamask', async ({ data }) => {
-  const client = await createRingsNodeClient(data)
+  if (client) {
+    return {
+      address: client!.address,
+    }
+  }
+  const client_ = await createRingsNodeClient(data)
   const callback = new MessageCallbackInstance(
     // custom message
     async (response: any, message: any) => {
@@ -124,14 +137,15 @@ onMessage('connect-metamask', async ({ data }) => {
   )
   console.log(callback)
   debug(true)
-  await client?.listen(callback)
+  await client_?.listen(callback)
 
-  const connected = await client?.connect_peer_via_http('https://41d.1n.gs')
+  const connected = await client_?.connect_peer_via_http('https://41d.1n.gs')
   console.log(connected)
 
-  const info = await client?.get_node_info()
+  const info = await client_?.get_node_info()
   console.log(info)
+
   return {
-    address: client!.address,
+    address: client_!.address,
   }
 })
