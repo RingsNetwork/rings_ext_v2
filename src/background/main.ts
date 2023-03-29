@@ -1,4 +1,4 @@
-import init, { Client, UnsignedInfo } from '@ringsnetwork/rings-node'
+import init, { Client, debug, MessageCallbackInstance, UnsignedInfo } from '@ringsnetwork/rings-node'
 import { onMessage, sendMessage } from 'webext-bridge/background'
 import type { Tabs } from 'webextension-polyfill'
 import browser from 'webextension-polyfill'
@@ -70,7 +70,8 @@ const createRingsNodeClient = async ({ turnUrl, account }: { turnUrl: string; ac
   )
   const signature = new Uint8Array(hexToBytes(signed))
 
-  let client_ = await Client.new_client(unsignedInfo, signature, turnUrl)
+  debug(true)
+  let client_: Client = await Client.new_client(unsignedInfo, signature, turnUrl)
   client = client_
   return client_
 }
@@ -101,10 +102,72 @@ const createRingsNodeClient = async ({ turnUrl, account }: { turnUrl: string; ac
 // init client
 onMessage('connect-metamask', async ({ data }) => {
   const client = await createRingsNodeClient(data)
+  const callback = new MessageCallbackInstance(
+    // custom message
+    async (response: any, message: any) => {
+      console.group('on custom message')
+      const { relay } = response
+      console.log(`relay`, relay)
+      console.log(`destination`, relay.destination)
+      console.log(message)
+      console.log(new TextDecoder().decode(message))
+      const to = relay.destination.replace(/^0x/, '')
+      const from = relay.path[0].replace(/^0x/, '')
+      console.log(`from`, from)
+      console.log(`to`, to)
+      console.groupEnd()
 
-  const connected = await client.connect_peer_via_http('https://41d.1n.gs')
+      // dispatch({
+      //   type: RECEIVE_MESSAGE,
+      //   payload: {
+      //     peer: from,
+      //     message: {
+      //       from,
+      //       to,
+      //       // message: new TextDecoder().decode(message)
+      //     },
+      //   },
+      // })
+    },
+    // http response message
+    async (response: any, message: any) => {
+      console.group('on http response message')
+      const { tx_id } = response
+      console.log(`txId`, tx_id)
+      console.log(`message`, message)
+      // if (MESSAGE.current[tx_id] === 'pending') {
+      //   // const { http_server } = JSON.parse(new TextDecoder().decode(message))
+      //   // console.log(`json`, http_server)
+      //   if (message) {
+      //     const { body, headers, ...rest }: { body: any; headers: Map<string, string> } = message
+      //     const parsedHeaders: { [key: string]: string } = {}
+
+      //     for (const [key, value] of headers.entries()) {
+      //       parsedHeaders[key] = value
+      //     }
+
+      //     const parsedBody = new TextDecoder().decode(new Uint8Array(body))
+      //     console.log(`parsed`, { ...rest, headers: parsedHeaders, body: parsedBody })
+
+      //     MESSAGE.current[tx_id] = JSON.stringify({ ...rest, headers: parsedHeaders, body: parsedBody })
+      //   }
+      // }
+      console.groupEnd()
+    },
+    async (relay: any, prev: String) => {
+      // console.group('on builtin message')
+      // console.log(relay)
+      // console.log(prev)
+      // console.groupEnd()
+    }
+  )
+  console.log(callback)
+  await client?.listen(callback)
+
+  const connected = await client?.connect_peer_via_http('https://41d.1n.gs')
   console.log(connected)
-  const info = await client.get_node_info()
+
+  const info = await client?.get_node_info()
   console.log(info)
   return {
     address: client!.address,
