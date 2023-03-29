@@ -1,10 +1,11 @@
 // Convert a hex string to a byte array
-export function hexToBytes(hex: string) {
-  const result = []
-  for (let i = 0; i < hex.length; i += 2) {
-    result.push(parseInt(hex.substr(i, 2), 16))
-  }
-  return result
+export function hexToBytes(hex: number | string) {
+  hex = hex.toString(16)
+
+  hex = hex.replace(/^0x/i, '')
+
+  for (var bytes = [], c = 0; c < hex.length; c += 2) bytes.push(parseInt(hex.slice(c, c + 2), 16))
+  return bytes
 }
 
 // Convert a byte array to a hex string
