@@ -24,7 +24,12 @@ export function Popup() {
   }, [])
 
   return (
-    <div className="container w-358px h-600px flex-col-center">
+    <div
+      style={{
+        fontFamily: 'Dogica Pixel',
+      }}
+      className="container w-358px h-600px flex-col-center"
+    >
       <div className="w-full h-full">
         <div className="text-base">Account: {address}</div>
         <div>Block number: {data}</div>

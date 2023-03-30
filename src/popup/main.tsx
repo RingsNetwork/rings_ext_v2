@@ -4,6 +4,7 @@ import { configureChains, createClient, WagmiConfig } from 'wagmi'
 import { arbitrum, arbitrumGoerli, bsc, bscTestnet, goerli, mainnet, polygon } from 'wagmi/chains'
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
 import { publicProvider } from 'wagmi/providers/public'
+import { sendMessage } from 'webext-bridge/popup'
 
 import { metamaskProvider } from '~/provider'
 
@@ -11,6 +12,7 @@ import { Popup } from './Popup'
 
 import '@unocss/reset/tailwind.css'
 import 'uno.css'
+// import './assets/styles/index.css'
 
 const { chains, provider, webSocketProvider } = configureChains(
   [arbitrum, arbitrumGoerli, bsc, bscTestnet, mainnet, polygon, goerli],
@@ -32,6 +34,11 @@ const client = createClient({
   provider,
   webSocketProvider,
 })
+
+;(async () => {
+  const data = await sendMessage('check-status', null)
+  console.log(data.clients)
+})()
 
 ready(() => {
   const root = createRoot(document.getElementById('root')!)

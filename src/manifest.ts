@@ -43,7 +43,7 @@ export async function getManifest() {
     ],
     web_accessible_resources: [
       'dist/contentScripts/style.css',
-      'dist/contentScripts/sdk.js',
+      'dist/contentScripts/inpage.js',
       'dist/background/rings_node_bg.wasm',
     ],
     content_security_policy: isDev

@@ -18,13 +18,13 @@ export default defineConfig({
     emptyOutDir: false,
     sourcemap: isDev ? 'inline' : false,
     lib: {
-      entry: r('src/contentScripts/sdk.ts'),
+      entry: r('src/contentScripts/inpage.ts'),
       formats: ['es'],
       name: 'ringsNode',
     },
     rollupOptions: {
       output: {
-        entryFileNames: 'sdk.js',
+        entryFileNames: 'inpage.js',
       },
     },
   },

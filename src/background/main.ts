@@ -1,4 +1,4 @@
-import init, { Client, debug, MessageCallbackInstance, UnsignedInfo } from '@ringsnetwork/rings-node'
+import init, { Client, MessageCallbackInstance, UnsignedInfo } from '@ringsnetwork/rings-node'
 import { onMessage, sendMessage } from 'webext-bridge/background'
 import browser from 'webextension-polyfill'
 
@@ -11,39 +11,14 @@ browser.runtime.onInstalled.addListener((): void => {
 
 let wasmInit: any = null
 let client: Client | null = null
+let currentAccount: string | undefined
 
-const createRingsNodeClient = async ({ turnUrl, account }: { turnUrl: string; account: string }) => {
-  if (client) {
-    return
+onMessage('check-status', async () => {
+  return {
+    clients: client ? [client] : [],
+    currentAccount,
   }
-  // init wasm
-  if (!wasmInit) {
-    wasmInit = await init(browser.runtime.getURL('dist/background/rings_node_bg.wasm'))
-  }
-
-  // prepare auth & send to metamask for sign
-  const unsignedInfo = new UnsignedInfo(account)
-  const { signed } = await sendMessage(
-    'sign-message',
-    {
-      auth: unsignedInfo.auth,
-    },
-    'popup'
-  )
-  const signature = new Uint8Array(hexToBytes(signed))
-
-  console.log({
-    account,
-    turnUrl,
-    signed,
-    auth: unsignedInfo.auth,
-    signature,
-  })
-
-  let client_: Client = await Client.new_client(unsignedInfo, signature, turnUrl)
-  client = client_
-  return client_
-}
+})
 
 // Provider
 // client: Client | null,
@@ -70,6 +45,7 @@ const createRingsNodeClient = async ({ turnUrl, account }: { turnUrl: string; ac
 
 // init client
 onMessage('connect-metamask', async ({ data }) => {
+  if (!data.account) return null
   if (client) {
     return {
       address: client!.address,
@@ -135,12 +111,10 @@ onMessage('connect-metamask', async ({ data }) => {
       // console.groupEnd()
     }
   )
-  console.log(callback)
-  debug(true)
+
   await client_?.listen(callback)
 
-  const connected = await client_?.connect_peer_via_http('https://41d.1n.gs')
-  console.log(connected)
+  await client_?.connect_peer_via_http('https://41d.1n.gs')
 
   const info = await client_?.get_node_info()
   console.log(info)
@@ -149,3 +123,36 @@ onMessage('connect-metamask', async ({ data }) => {
     address: client_!.address,
   }
 })
+
+async function createRingsNodeClient({ turnUrl, account }: { turnUrl: string; account: string }) {
+  if (client && currentAccount === account) {
+    return
+  }
+  // init wasm
+  if (!wasmInit) {
+    wasmInit = await init(browser.runtime.getURL('dist/background/rings_node_bg.wasm'))
+  }
+
+  // prepare auth & send to metamask for sign
+  const unsignedInfo = new UnsignedInfo(account)
+  const { signed } = await sendMessage(
+    'sign-message',
+    {
+      auth: unsignedInfo.auth,
+    },
+    'popup'
+  )
+  const signature = new Uint8Array(hexToBytes(signed))
+
+  console.log({
+    account,
+    turnUrl,
+    signed,
+    auth: unsignedInfo.auth,
+    signature,
+  })
+
+  let client_: Client = await Client.new_client(unsignedInfo, signature, turnUrl)
+  client = client_
+  return client_
+}

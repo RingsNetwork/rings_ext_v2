@@ -13,9 +13,16 @@ declare module 'webext-bridge' {
       },
       {
         address: string
-      }
+      } | null
     >
     'sign-message': ProtocolWithReturn<{ auth: string }, { signed: string }>
+    'check-status': ProtocolWithReturn<
+      any,
+      {
+        clients: any[]
+        currentAccount: string | undefined
+      }
+    >
   }
 }
 
@@ -28,6 +35,6 @@ declare module '@metamask/post-message-stream' {
 
 declare global {
   interface Window {
-    ringsNode: any
+    rings: any
   }
 }

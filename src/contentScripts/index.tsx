@@ -8,8 +8,8 @@ import { App } from './views/App'
 import '@unocss/reset/tailwind.css'
 import 'uno.css'
 
-const CONTENT_SCRIPT = 'fisand-contentscript'
-const INPAGE = 'fisand-inpage'
+const CONTENT_SCRIPT = 'rings-contentscript'
+const INPAGE = 'rings-inpage'
 
 const setupPageStream = () => {
   const pageStream = new WindowPostMessageStream({
@@ -18,9 +18,16 @@ const setupPageStream = () => {
   })
 
   pageStream.on('data', (data) => {
-    console.log(data + ', world')
+    console.log(data)
     setTimeout(() => {
-      pageStream.write('callback')
+      pageStream.write({
+        type: 'request',
+        payload: {
+          success: true,
+          requestId: data.requestId,
+          data: { success: true },
+        },
+      })
     }, 1500)
   })
 }
@@ -48,7 +55,7 @@ const setupPageStream = () => {
   const scriptEl = document.createElement('script')
   const shadowDOM = container.attachShadow?.({ mode: __DEV__ ? 'open' : 'closed' }) || container
 
-  scriptEl.setAttribute('src', browser.runtime.getURL('dist/contentScripts/sdk.js'))
+  scriptEl.setAttribute('src', browser.runtime.getURL('dist/contentScripts/inpage.js'))
   styleEl.setAttribute('rel', 'stylesheet')
   styleEl.setAttribute('href', browser.runtime.getURL('dist/contentScripts/style.css'))
 
@@ -58,4 +65,5 @@ const setupPageStream = () => {
   document.body.appendChild(container)
   const $root = createRoot(root)
   $root.render(<App />)
+  shadowDOM.removeChild(scriptEl)
 })()
