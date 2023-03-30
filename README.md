@@ -1,6 +1,7 @@
 # ext-v2
 
 - **Nodejs** >= v16.13.0
+- **pnpm** >= v7.13.2
 
 ## Features
 
