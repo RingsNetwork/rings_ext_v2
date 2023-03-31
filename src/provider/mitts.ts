@@ -20,6 +20,7 @@ export function createProvider() {
   const inpageStream = new WindowPostMessageStream<
     RequestArguments & {
       requestId: number
+      type: string
     },
     {
       type: string
@@ -49,6 +50,7 @@ export function createProvider() {
     console.log(method, params)
 
     inpageStream.write({
+      type: 'request',
       method,
       params,
       requestId: ++requestId,
@@ -66,9 +68,9 @@ export function createProvider() {
     if (type === 'request') {
       let _promise = promiseMap.get(payload['requestId'])
       if (payload.success) {
-        _promise.resolve(payload.data)
+        _promise.resolve(payload)
       } else {
-        _promise.reject(payload.data)
+        _promise.reject(payload)
       }
     }
 

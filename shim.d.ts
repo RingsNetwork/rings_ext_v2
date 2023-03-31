@@ -23,6 +23,16 @@ declare module 'webext-bridge' {
         currentAccount: string | undefined
       }
     >
+    'request-handler': ProtocolWithReturn<
+      {
+        type: string
+        requestId: number
+      },
+      {
+        success?: boolean
+        requestId: number
+      } & Record<string, any>
+    >
   }
 }
 

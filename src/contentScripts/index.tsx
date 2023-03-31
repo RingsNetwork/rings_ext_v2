@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { WindowPostMessageStream } from '@metamask/post-message-stream'
 import { createRoot } from 'react-dom/client'
-import { onMessage } from 'webext-bridge/content-script'
+import { onMessage, sendMessage } from 'webext-bridge/content-script'
 
 import { App } from './views/App'
 
@@ -12,23 +12,22 @@ const CONTENT_SCRIPT = 'rings-contentscript'
 const INPAGE = 'rings-inpage'
 
 const setupPageStream = () => {
-  const pageStream = new WindowPostMessageStream({
+  const pageStream = new WindowPostMessageStream<
+    { type: string; payload: any },
+    { type: string } & Record<string, any>
+  >({
     name: CONTENT_SCRIPT,
     target: INPAGE,
   })
 
-  pageStream.on('data', (data) => {
-    console.log(data)
-    setTimeout(() => {
+  pageStream.on('data', async (data) => {
+    if (data?.type === 'request') {
+      const res = await sendMessage('request-handler', data as any)
       pageStream.write({
         type: 'request',
-        payload: {
-          success: true,
-          requestId: data.requestId,
-          data: { success: true },
-        },
+        payload: res,
       })
-    }, 1500)
+    }
   })
 }
 

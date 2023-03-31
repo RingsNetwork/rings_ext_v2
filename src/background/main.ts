@@ -20,6 +20,14 @@ onMessage('check-status', async () => {
   }
 })
 
+onMessage('request-handler', async ({ data }) => {
+  return {
+    success: true,
+    currentAccount,
+    requestId: data.requestId,
+  }
+})
+
 // Provider
 // client: Client | null,
 // fetchPeers: () => Promise<Peer[]>,
