@@ -30,6 +30,8 @@ export function Popup() {
   }, [])
 
   const [loading, setLoading] = useState(false)
+  const [turnUrl] = useState('stun://stun.qq.com:3478')
+  const [nodeUrl] = useState('https://41d.1n.gs')
   const createClient = useCallback(async () => {
     if (loading) return
     try {
@@ -37,7 +39,8 @@ export function Popup() {
       if (address) {
         const data = await sendMessage('connect-metamask', {
           account: address,
-          turnUrl: 'stun://stun.qq.com:3478',
+          turnUrl,
+          nodeUrl,
         })
 
         setClients(data.clients)
@@ -47,12 +50,13 @@ export function Popup() {
     } finally {
       setLoading(false)
     }
-  }, [address, loading])
+  }, [address, loading, nodeUrl, turnUrl])
 
   const contentRef = useRef<HTMLDivElement | null>(null)
 
+  // h-600px
   return (
-    <div className="w-358px h-600px flex-col-center font-pixel">
+    <div className="w-358px h-400px flex-col-center font-pixel">
       <div className="w-full h-full">
         <div className="relative p-2.5 flex justify-between items-center border-solid border-b border-gray-300">
           <div className="flex-1 text-xs">RingsNetwork</div>
@@ -76,7 +80,7 @@ export function Popup() {
               className={`absolute w-6 h-6 cursor-pointer transition-all ${
                 clients.length
                   ? 'text-#15CD96 i-eos-icons:network-policy'
-                  : 'text-red-400 i-eos-icons:network-policy-outlined'
+                  : 'text-#fb7185 i-eos-icons:network-policy-outlined'
               } ${loading ? 'scale-x-0' : ''}`}
               onClick={() => {
                 if (!clients.length) {
@@ -91,6 +95,17 @@ export function Popup() {
                 loading ? '' : 'scale-x-0'
               }`}
             ></span>
+          </div>
+        </div>
+
+        <div className="relative p-2.5">
+          <div className="flex justify-between items-center">
+            <span className="w-80px text-xs scale-90 origin-left">NodeUrl:</span>
+            <input className="h-7 px-1 flex-1 fake-border outline-none scale-90 origin-right" value={turnUrl}></input>
+          </div>
+          <div className="mt-2.5 flex justify-between items-center">
+            <span className="w-80px text-xs scale-90 origin-left">TurnUrl:</span>
+            <input className="h-7 px-1 flex-1 fake-border outline-none scale-90 origin-right" value={nodeUrl}></input>
           </div>
         </div>
       </div>

@@ -4,15 +4,27 @@ import browser from 'webextension-polyfill'
 
 import { hexToBytes } from '~/utils'
 
+import { ADDRESS_TYPE, getAddressWithType, handlerError } from './utils'
+
 browser.runtime.onInstalled.addListener((): void => {
   // eslint-disable-next-line no-console
   console.log('Extension installed')
 })
 
 let wasmInit: any = null
-let client: Client | null = null
+let currentClient: Client | null = null
 let clients: Client[] = []
 let currentAccount: string | undefined
+const requestHandlerMap: Record<string, any> = {
+  fetchPeers,
+  sendMessage: sendRingsMessage,
+  connectByAddress,
+  createOffer,
+  answer_offer,
+  acceptAnswer,
+  disconnect,
+  getNodeInfo,
+}
 
 onMessage('check-status', async () => {
   return {
@@ -22,12 +34,38 @@ onMessage('check-status', async () => {
 })
 
 onMessage('request-handler', async ({ data }) => {
+  const requestId = data.requestId
+  const method = data.method
+  if (requestHandlerMap[method]) {
+    try {
+      const data = await fetchPeers()
+      return {
+        success: true,
+        requestId,
+        data,
+      }
+    } catch (error) {
+      return { requestId, ...handlerError(error) }
+    }
+  }
+
   return {
     success: true,
     currentAccount,
-    requestId: data.requestId,
+    requestId,
   }
 })
+
+export interface Peer {
+  address: string
+  state: string | undefined
+  transport_pubkey: string
+  transport_id: string
+  name: string
+  bns: string
+  ens: string
+  type: ADDRESS_TYPE
+}
 
 // Provider
 // client: Client | null,
@@ -54,10 +92,10 @@ onMessage('request-handler', async ({ data }) => {
 
 // init client
 onMessage('connect-metamask', async ({ data }) => {
-  if (client) {
+  if (currentClient) {
     return {
       clients,
-      address: client!.address,
+      address: currentClient!.address,
     }
   }
   const client_ = await createRingsNodeClient(data)
@@ -123,7 +161,7 @@ onMessage('connect-metamask', async ({ data }) => {
 
   await client_?.listen(callback)
 
-  await client_?.connect_peer_via_http('https://41d.1n.gs')
+  await client_?.connect_peer_via_http(data.nodeUrl)
 
   const info = await client_?.get_node_info()
   console.log(info)
@@ -134,8 +172,55 @@ onMessage('connect-metamask', async ({ data }) => {
   }
 })
 
+async function fetchPeers(): Promise<Peer[]> {
+  if (!currentClient) return []
+  return currentClient.list_peers()
+}
+
+async function sendRingsMessage(to: string, message: string) {
+  if (currentClient) {
+    return await currentClient.send_message(to, new TextEncoder().encode(message))
+  }
+}
+
+async function connectByAddress(address: string) {
+  if (currentClient && currentAccount) {
+    return await currentClient.connect_with_address(address, getAddressWithType(currentAccount).type)
+  }
+}
+
+async function createOffer() {
+  if (currentClient) {
+    return (await currentClient.create_offer()) as string
+  }
+}
+
+async function answer_offer(offer: string) {
+  if (currentClient && offer) {
+    return await currentClient.answer_offer(offer)
+  }
+}
+
+async function acceptAnswer(transportId: any, answer: any) {
+  if (currentClient && transportId) {
+    return await currentClient.accept_answer(transportId, answer)
+  }
+}
+
+async function disconnect(address: string, addr_type?: number) {
+  if (currentClient && address) {
+    return await currentClient.disconnect(address, addr_type)
+  }
+}
+
+async function getNodeInfo() {
+  if (currentClient) {
+    return await currentClient.get_node_info()
+  }
+}
+
 async function createRingsNodeClient({ turnUrl, account }: { turnUrl: string; account: string }) {
-  if (client && currentAccount === account) {
+  if (currentClient && currentAccount === account) {
     return
   }
   // init wasm
@@ -164,7 +249,7 @@ async function createRingsNodeClient({ turnUrl, account }: { turnUrl: string; ac
 
   let client_: Client = await Client.new_client(unsignedInfo, signature, turnUrl)
   currentAccount = account
-  client = client_
+  currentClient = client_
   clients.push(client_)
   return client_
 }

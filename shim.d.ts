@@ -10,6 +10,7 @@ declare module 'webext-bridge' {
       {
         account: string
         turnUrl: string
+        nodeUrl: string
       },
       {
         address: string
@@ -28,7 +29,7 @@ declare module 'webext-bridge' {
       {
         type: string
         requestId: number
-      },
+      } & Record<string, any>,
       {
         success?: boolean
         requestId: number

@@ -65,27 +65,24 @@ export function createProvider() {
   }
 
   inpageStream.on('data', async ({ type, payload }) => {
-    if (type === 'request') {
-      let _promise = promiseMap.get(payload['requestId'])
-      if (payload.success) {
-        _promise.resolve(payload)
-      } else {
-        _promise.reject(payload)
-      }
-    }
-
-    if (type === 'accountChange') {
-      // do something
-    }
-
-    if (type === 'connected') {
-    }
-
-    if (type === 'disconnected') {
-    }
-
-    if (type === 'onMessage') {
-      // do something
+    switch (type) {
+      case 'request':
+        requestHandler(payload, promiseMap)
+        break
+      case 'accountChange':
+        // do something
+        break
+      case 'connected':
+        // do something
+        break
+      case 'disconnected':
+        // do something
+        break
+      case 'onMessage':
+        // do something
+        break
+      default:
+        break
     }
   })
 
@@ -104,4 +101,9 @@ export function createProvider() {
     [Symbol('__getEmitter__')]: getEmitter,
     [Symbol('__getInpageStream__')]: getInpageStream,
   }
+}
+
+function requestHandler(payload: Record<string, any>, promiseMap: Map<any, any>) {
+  let _promise = promiseMap.get(payload['requestId'])
+  payload.success ? _promise.resolve(payload) : _promise.reject(payload)
 }
