@@ -52,10 +52,11 @@
     ]
   },
   "dependencies": {
+    "@did-network/dapp-sdk": "^0.1.9",
     "@metamask/post-message-stream": "^6.1.1",
     "@metamask/providers": "^10.2.1",
     "@ringsnetwork/bns-util": "^0.9.1",
-    "@ringsnetwork/rings-node": "0.2.5-dev-20230329.1",
+    "@ringsnetwork/rings-node": "0.2.5-dev-20230331.0",
     "@unocss/reset": "^0.50.6",
     "buffer": "^6.0.3",
     "document-ready": "^2.0.2",
@@ -70,6 +71,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.26.1",
     "@ffflorian/jszip-cli": "^3.1.9",
+    "@iconify-json/eos-icons": "^1.1.6",
     "@rollup/plugin-replace": "^5.0.2",
     "@types/document-ready": "^2.0.0",
     "@types/fs-extra": "^11.0.1",

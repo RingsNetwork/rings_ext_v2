@@ -28,7 +28,8 @@
     "storage",
     "activeTab",
     "http://*/",
-    "https://*/"
+    "https://*/",
+    "webNavigation"
   ],
   "content_scripts": [
     {
@@ -46,5 +47,5 @@
     "dist/contentScripts/inpage.js",
     "dist/background/rings_node_bg.wasm"
   ],
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+  "content_security_policy": "script-src 'self' 'unsafe-eval' http://localhost:3303; object-src 'self' http://localhost:3303"
 }

@@ -11,11 +11,12 @@ browser.runtime.onInstalled.addListener((): void => {
 
 let wasmInit: any = null
 let client: Client | null = null
+let clients: Client[] = []
 let currentAccount: string | undefined
 
 onMessage('check-status', async () => {
   return {
-    clients: client ? [client] : [],
+    clients,
     currentAccount,
   }
 })
@@ -53,9 +54,9 @@ onMessage('request-handler', async ({ data }) => {
 
 // init client
 onMessage('connect-metamask', async ({ data }) => {
-  if (!data.account) return null
   if (client) {
     return {
+      clients,
       address: client!.address,
     }
   }
@@ -128,6 +129,7 @@ onMessage('connect-metamask', async ({ data }) => {
   console.log(info)
 
   return {
+    clients,
     address: client_!.address,
   }
 })
@@ -161,6 +163,8 @@ async function createRingsNodeClient({ turnUrl, account }: { turnUrl: string; ac
   })
 
   let client_: Client = await Client.new_client(unsignedInfo, signature, turnUrl)
+  currentAccount = account
   client = client_
+  clients.push(client_)
   return client_
 }

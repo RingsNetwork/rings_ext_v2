@@ -5,3 +5,33 @@
   font-weight: normal;
   font-style: normal;
 }
+
+.border-angle::before,
+.border-angle::after {
+  content: '';
+  position: absolute;
+}
+
+.border-angle::before {
+  top: -0.5px;
+  left: -0.5px;
+  height: 100%;
+  width: 6px;
+  /* transform: scale(1.04); */
+  background-image: url('/assets/tl.png'), url('/assets/bl.png');
+  background-size: contain;
+  background-position: top left, bottom left;
+  background-repeat: no-repeat;
+}
+
+.border-angle::after {
+  top: -0.5px;
+  right: -0.5px;
+  height: 100%;
+  width: 6px;
+  /* transform: scale(1.04); */
+  background-image: url('/assets/tr.png'), url('/assets/br.png');
+  background-size: contain;
+  background-position: top right, bottom right;
+  background-repeat: no-repeat;
+}

@@ -13,7 +13,8 @@ declare module 'webext-bridge' {
       },
       {
         address: string
-      } | null
+        clients: any[]
+      }
     >
     'sign-message': ProtocolWithReturn<{ auth: string }, { signed: string }>
     'check-status': ProtocolWithReturn<
