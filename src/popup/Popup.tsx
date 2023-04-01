@@ -123,9 +123,7 @@ export function Popup() {
         >
           <div className="p-2.5 flex items-center justify-between text-xs border-solid border-b border-gray-300">
             <span className="scale-80 origin-left">Network Status:</span>
-            <span className="flex-1 text-right scale-80 origin-right">
-              {clients.length ? `${clients.length} clients` : 'Not yet init'}
-            </span>
+            <span className="flex-1 text-right scale-80 origin-right">{clients.length ? `online` : 'offline'}</span>
           </div>
           <div className="flex-1"></div>
           <div className="p-2.5 flex items-center justify-between text-xs border-solid border-t border-gray-300">
