@@ -5,7 +5,7 @@ import { onMessage, sendMessage } from 'webext-bridge/popup'
 
 export function Popup() {
   const { address, isConnected } = useAccount()
-  const { connect, connectors, isLoading, pendingConnector } = useConnect()
+  const { connect, connectors, isLoading, pendingConnector, connectAsync } = useConnect()
   const { disconnect } = useDisconnect()
 
   const [show, setShow] = useState(false)
@@ -35,10 +35,15 @@ export function Popup() {
   const createClient = useCallback(async () => {
     if (loading) return
     try {
+      let address_ = address
       setLoading(true)
-      if (address) {
+      if (!address) {
+        const data = await connectAsync({ connector: connectors[0] })
+        address_ = data.account
+      }
+      if (address_) {
         const data = await sendMessage('init-background', {
-          account: address,
+          account: address_,
           turnUrl,
           nodeUrl,
         })
@@ -50,7 +55,7 @@ export function Popup() {
     } finally {
       setLoading(false)
     }
-  }, [address, loading, nodeUrl, turnUrl])
+  }, [address, connectAsync, connectors, loading, nodeUrl, turnUrl])
 
   const destroyClient = useCallback(async () => {
     sendMessage('destroy-client', null)
