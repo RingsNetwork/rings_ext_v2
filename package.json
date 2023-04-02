@@ -109,5 +109,10 @@
     "web-ext": "^7.6.0",
     "webext-bridge": "6.0.0-rc4",
     "webextension-polyfill": "^0.10.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "ethereumjs-abi": "https://codeload.github.com/ethereumjs/ethereumjs-abi/tar.gz/ee3994657fa7a427238e6ba92a84d0b529bbcde0"
+    }
   }
 }
