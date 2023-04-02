@@ -15,15 +15,21 @@ let wasmInit: any = null
 let currentClient: Client | null = null
 let clients: Client[] = []
 let currentAccount: string | undefined
+let serviceNodes = new Map<string, any[]>()
+
+/**
+ * inpage provider request method map
+ */
 const requestHandlerMap: Record<string, any> = {
   fetchPeers,
   sendMessage: sendRingsMessage,
   connectByAddress,
   createOffer,
-  answer_offer,
+  answerOffer,
   acceptAnswer,
   disconnect,
   getNodeInfo,
+  getServiceNodes,
 }
 
 onMessage('check-status', async () => {
@@ -33,12 +39,14 @@ onMessage('check-status', async () => {
   }
 })
 
+onMessage('destroy-client', destroyClient)
+
 onMessage('request-handler', async ({ data }) => {
   const requestId = data.requestId
   const method = data.method
   if (requestHandlerMap[method]) {
     try {
-      const data = await fetchPeers()
+      const data = await requestHandlerMap[method]()
       return {
         success: true,
         requestId,
@@ -90,8 +98,8 @@ export interface Peer {
 // endChat: (peer: string) => void,
 // asyncSendMessage: (message: HttpMessageProps) => Promise<any>
 
-// init client
-onMessage('connect-metamask', async ({ data }) => {
+// init background client
+onMessage('init-background', async ({ data }) => {
   if (currentClient) {
     return {
       clients,
@@ -161,7 +169,10 @@ onMessage('connect-metamask', async ({ data }) => {
 
   await client_?.listen(callback)
 
-  await client_?.connect_peer_via_http(data.nodeUrl)
+  const promises = data.nodeUrl.split(';').map(async (url: string) => await client_?.connect_peer_via_http(url))
+  await Promise.any(promises)
+
+  invokeFindServiceNode()
 
   const info = await client_?.get_node_info()
   console.log(info)
@@ -171,6 +182,10 @@ onMessage('connect-metamask', async ({ data }) => {
     address: client_!.address,
   }
 })
+
+/**
+ * inpage methods
+ */
 
 async function fetchPeers(): Promise<Peer[]> {
   if (!currentClient) return []
@@ -195,7 +210,7 @@ async function createOffer() {
   }
 }
 
-async function answer_offer(offer: string) {
+async function answerOffer(offer: string) {
   if (currentClient && offer) {
     return await currentClient.answer_offer(offer)
   }
@@ -216,6 +231,48 @@ async function disconnect(address: string, addr_type?: number) {
 async function getNodeInfo() {
   if (currentClient) {
     return await currentClient.get_node_info()
+  }
+}
+
+function invokeFindServiceNode(serviceType = 'ipfs_provider', duration = 3000) {
+  findServiceNode()
+
+  console.log(serviceNodes.get(serviceType))
+
+  const timer = setInterval(() => {
+    console.log('findServiceNode', serviceNodes.get(serviceType))
+
+    if (serviceNodes.get(serviceType)?.length || !currentClient) {
+      clearInterval(timer)
+      return
+    }
+    findServiceNode()
+  }, duration)
+}
+
+async function findServiceNode(serviceType = 'ipfs_provider') {
+  if (currentClient && !serviceNodes.get(serviceType)?.length) {
+    const nodes = await currentClient.lookup_service(serviceType)
+    serviceNodes.set(serviceType, nodes)
+  }
+}
+
+function getServiceNodes(serviceType = 'ipfs_provider') {
+  return serviceNodes.get(serviceType)
+}
+
+function destroyClient() {
+  if (currentClient) {
+    clients.includes(currentClient) &&
+      clients.splice(
+        clients.findIndex((c) => currentClient === c),
+        1
+      )
+    currentClient = null
+  }
+
+  if (currentAccount) {
+    currentAccount = undefined
   }
 }
 

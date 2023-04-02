@@ -6,7 +6,7 @@ declare module 'webext-bridge' {
     // see https://github.com/antfu/webext-bridge#type-safe-protocols
     'tab-prev': { title: string | undefined }
     'get-current-tab': ProtocolWithReturn<{ tabId: number }, { title: string }>
-    'connect-metamask': ProtocolWithReturn<
+    'init-background': ProtocolWithReturn<
       {
         account: string
         turnUrl: string
@@ -35,6 +35,7 @@ declare module 'webext-bridge' {
         requestId: number
       } & Record<string, any>
     >
+    'destroy-client': any
   }
 }
 

@@ -37,7 +37,7 @@ export function Popup() {
     try {
       setLoading(true)
       if (address) {
-        const data = await sendMessage('connect-metamask', {
+        const data = await sendMessage('init-background', {
           account: address,
           turnUrl,
           nodeUrl,
@@ -51,6 +51,14 @@ export function Popup() {
       setLoading(false)
     }
   }, [address, loading, nodeUrl, turnUrl])
+
+  const destroyClient = useCallback(async () => {
+    sendMessage('destroy-client', null)
+
+    setShow(false)
+    const data = await sendMessage('check-status', null)
+    setClients(data.clients)
+  }, [])
 
   const contentRef = useRef<HTMLDivElement | null>(null)
 
@@ -100,12 +108,20 @@ export function Popup() {
 
         <div className="relative p-2.5">
           <div className="flex justify-between items-center">
-            <span className="w-80px text-xs scale-90 origin-left">NodeUrl:</span>
-            <input className="h-7 px-1 flex-1 fake-border outline-none scale-90 origin-right" value={turnUrl}></input>
+            <span className="w-80px text-xs scale-90 origin-left">TurnUrl:</span>
+            <input
+              className="h-7 px-1 flex-1 fake-border outline-none scale-90 origin-right disabled:opacity-60"
+              value={turnUrl}
+              disabled={clients.length > 0}
+            />
           </div>
           <div className="mt-2.5 flex justify-between items-center">
-            <span className="w-80px text-xs scale-90 origin-left">TurnUrl:</span>
-            <input className="h-7 px-1 flex-1 fake-border outline-none scale-90 origin-right" value={nodeUrl}></input>
+            <span className="w-80px text-xs scale-90 origin-left">NodeUrl:</span>
+            <input
+              className="h-7 px-1 flex-1 fake-border outline-none scale-90 origin-right disabled:opacity-60"
+              value={nodeUrl}
+              disabled={clients.length > 0}
+            />
           </div>
         </div>
       </div>
@@ -122,8 +138,22 @@ export function Popup() {
           className={`!absolute top-13 right-2.5 flex flex-col items-stretch w-300px h-300px -translate-y-1.5 bg-white border-angle fake-border`}
         >
           <div className="p-2.5 flex items-center justify-between text-xs border-solid border-b border-gray-300">
-            <span className="scale-80 origin-left">Network Status:</span>
-            <span className="flex-1 text-right scale-80 origin-right">{clients.length ? `online` : 'offline'}</span>
+            <span className={`scale-80 origin-left`}>
+              Network Status:{' '}
+              <span className={`${clients.length ? 'text-#15CD96' : 'text-#fb7185 '}`}>
+                {clients.length ? `online` : 'offline'}
+              </span>
+            </span>
+            <span
+              className="flex-1 text-right scale-80 origin-right cursor-pointer transition-all hover:translate-x-.25"
+              onClick={() => {
+                if (clients.length > 0) {
+                  destroyClient()
+                }
+              }}
+            >
+              {clients.length ? `offline` : '--'}
+            </span>
           </div>
           <div className="flex-1"></div>
           <div className="p-2.5 flex items-center justify-between text-xs border-solid border-t border-gray-300">
@@ -133,7 +163,7 @@ export function Popup() {
                 disconnect()
                 setShow(false)
               }}
-              className="cursor-pointer scale-80 origin-right"
+              className="cursor-pointer scale-80 origin-right transition-all hover:translate-x-.25"
             >
               Disconnect
             </span>
