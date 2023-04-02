@@ -31,9 +31,6 @@ export function createProvider() {
     target: CONTENT_SCRIPT,
   })
 
-  const getEmitter = () => emitter
-  const getInpageStream = () => inpageStream
-
   let promiseMap = new Map()
   let requestId = -1
 
@@ -49,19 +46,15 @@ export function createProvider() {
 
     console.log(method, params)
 
-    inpageStream.write({
-      type: 'request',
-      method,
-      params,
-      requestId: ++requestId,
+    const payload = { type: 'request', method, params, requestId: ++requestId }
+    inpageStream.write(payload)
+
+    const promise = new Promise<{ success: boolean }>((resolve, reject) => {
+      promiseMap.set(requestId, { resolve, reject })
     })
 
-    return new Promise((resolve, reject) => {
-      promiseMap.set(requestId, {
-        reject,
-        resolve,
-      })
-    })
+    const response = await promise
+    return response.success ? response : Promise.reject(response)
   }
 
   inpageStream.on('data', async ({ type, payload }) => {
@@ -86,24 +79,35 @@ export function createProvider() {
     }
   })
 
-  const on = (eventName: string, cb: any) => {
-    emitter.on(eventName, cb)
-  }
-
-  const off = (eventName: string) => {
-    emitter.off(eventName)
-  }
+  const on = emitter.on.bind(emitter)
+  const off = emitter.off.bind(emitter)
 
   return {
     on,
     off,
     request,
-    [Symbol('__getEmitter__')]: getEmitter,
-    [Symbol('__getInpageStream__')]: getInpageStream,
+    help,
+    [Symbol('__getEmitter__')]: () => emitter,
+    [Symbol('__getInpageStream__')]: () => inpageStream,
   }
 }
 
 function requestHandler(payload: Record<string, any>, promiseMap: Map<any, any>) {
-  let _promise = promiseMap.get(payload['requestId'])
-  payload.success ? _promise.resolve(payload) : _promise.reject(payload)
+  const { requestId, success } = payload
+  const _promise = promiseMap.get(payload['requestId'])
+  _promise[success ? 'resolve' : 'reject'](payload)
+  promiseMap.delete(requestId)
+}
+
+function help() {
+  console.log(`Support request methods:
+fetchPeers,
+sendMessage,
+connectByAddress,
+createOffer,
+answerOffer,
+acceptAnswer,
+disconnect,
+getNodeInfo,
+getServiceNodes`)
 }
