@@ -1,12 +1,12 @@
 /* eslint-disable no-console */
 import { WindowPostMessageStream } from '@metamask/post-message-stream'
-import { createRoot } from 'react-dom/client'
+// import { createRoot } from 'react-dom/client'
 import { onMessage, sendMessage } from 'webext-bridge/content-script'
 
-import { App } from './views/App'
+// import { App } from './views/App'
 
-import '@unocss/reset/tailwind.css'
-import 'uno.css'
+// import '@unocss/reset/tailwind.css'
+// import 'uno.css'
 
 const CONTENT_SCRIPT = 'rings-contentscript'
 const INPAGE = 'rings-inpage'
@@ -50,19 +50,19 @@ const setupPageStream = () => {
   const container = document.createElement('div')
   const root = document.createElement('div')
   container.className = 'webext-template'
-  const styleEl = document.createElement('link')
+  // const styleEl = document.createElement('link')
   const scriptEl = document.createElement('script')
   const shadowDOM = container.attachShadow?.({ mode: __DEV__ ? 'open' : 'closed' }) || container
 
   scriptEl.setAttribute('src', browser.runtime.getURL('dist/contentScripts/inpage.js'))
-  styleEl.setAttribute('rel', 'stylesheet')
-  styleEl.setAttribute('href', browser.runtime.getURL('dist/contentScripts/style.css'))
+  // styleEl.setAttribute('rel', 'stylesheet')
+  // styleEl.setAttribute('href', browser.runtime.getURL('dist/contentScripts/style.css'))
 
-  shadowDOM.appendChild(styleEl)
+  // shadowDOM.appendChild(styleEl)
   shadowDOM.appendChild(root)
   shadowDOM.appendChild(scriptEl)
   document.body.appendChild(container)
-  const $root = createRoot(root)
-  $root.render(<App />)
+  // const $root = createRoot(root)
+  // $root.render(<App />)
   shadowDOM.removeChild(scriptEl)
 })()
