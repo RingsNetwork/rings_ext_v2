@@ -3,6 +3,8 @@ import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { signMessage } from 'wagmi/actions'
 import { onMessage, sendMessage } from 'webext-bridge/popup'
 
+import type { Peer } from '../background/utils'
+
 export function Popup() {
   const { address, isConnected } = useAccount()
   const { connect, connectors, isLoading, pendingConnector, connectAsync } = useConnect()
@@ -64,6 +66,22 @@ export function Popup() {
     const data = await sendMessage('check-status', null)
     setClients(data.clients)
   }, [])
+
+  const [peers, setPeers] = useState<Peer[]>([])
+  const getPeers = useCallback(async () => {
+    const res = await sendMessage('get-peers', null)
+    setPeers(res)
+  }, [])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      getPeers()
+    }, 5000)
+
+    return () => {
+      clearInterval(timer)
+    }
+  }, [getPeers])
 
   const contentRef = useRef<HTMLDivElement | null>(null)
 
@@ -160,7 +178,12 @@ export function Popup() {
               {clients.length ? `offline` : '--'}
             </span>
           </div>
-          <div className="flex-1"></div>
+          <div className="flex-1">
+            <div className="p-2.5 flex items-center justify-between text-xs">
+              <span className="scale-80 origin-left">Peers:</span>
+              <span className="flex-1 text-right scale-80 origin-right">{peers.length}</span>
+            </div>
+          </div>
           <div className="p-2.5 flex items-center justify-between text-xs border-solid border-t border-gray-300">
             <span className="scale-80 origin-left">Wallet: {shorten(address)}</span>
             <span

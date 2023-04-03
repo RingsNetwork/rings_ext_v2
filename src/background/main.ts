@@ -4,7 +4,7 @@ import browser from 'webextension-polyfill'
 
 import { hexToBytes } from '~/utils'
 
-import { ADDRESS_TYPE, getAddressWithType, handlerError } from './utils'
+import { ADDRESS_TYPE, getAddressWithType, handlerError, HttpMessageProps, Peer } from './utils'
 
 browser.runtime.onInstalled.addListener((): void => {
   // eslint-disable-next-line no-console
@@ -17,12 +17,17 @@ let clients: Client[] = []
 let currentAccount: string | undefined
 let serviceNodes = new Map<string, any[]>()
 
+let messagePromiseMap = new Map<string, { resolve: Function; reject: Function }>()
+let messageStatusMap = new Map<string, any>()
+let messageIntervalMap = new Map<string, number>()
+
 /**
  * inpage provider request method map
  */
 const requestHandlerMap: Record<string, any> = {
   fetchPeers,
   sendMessage: sendRingsMessage,
+  asyncSendMessage,
   connectByAddress,
   createOffer,
   answerOffer,
@@ -40,6 +45,8 @@ onMessage('check-status', async () => {
 })
 
 onMessage('destroy-client', destroyClient)
+
+onMessage('get-peers', fetchPeers)
 
 onMessage('request-handler', async ({ data }) => {
   const requestId = data.requestId
@@ -63,40 +70,6 @@ onMessage('request-handler', async ({ data }) => {
     requestId,
   }
 })
-
-export interface Peer {
-  address: string
-  state: string | undefined
-  transport_pubkey: string
-  transport_id: string
-  name: string
-  bns: string
-  ens: string
-  type: ADDRESS_TYPE
-}
-
-// Provider
-// client: Client | null,
-// fetchPeers: () => Promise<Peer[]>,
-// sendMessage: (to: string, message: string) => Promise<void>,
-// connectByAddress: (address: string) => Promise<void>,
-// createOffer: () => Promise<void>,
-// answerOffer: (offer: any) => Promise<void>,
-// acceptAnswer: (transportId: any, answer: any) => Promise<void>,
-// turnUrl: string,
-// setTurnUrl: (turnUrl: string) => void,
-// nodeUrl: string,
-// setNodeUrl: (nodeUrl: string) => void,
-// status: string,
-// node: string,
-// nodeStatus: string,
-// setStatus: (status: string) => void,
-// disconnect: () => void,
-// state: StateProps,
-// dispatch: React.Dispatch<any>,
-// startChat: (peer: string) => void,
-// endChat: (peer: string) => void,
-// asyncSendMessage: (message: HttpMessageProps) => Promise<any>
 
 // init background client
 onMessage('init-background', async ({ data }) => {
@@ -136,35 +109,23 @@ onMessage('init-background', async ({ data }) => {
     },
     // http response message
     async (response: any, message: any) => {
-      console.group('on http response message')
       const { tx_id } = response
-      console.log(`txId`, tx_id)
-      console.log(`message`, message)
-      // if (MESSAGE.current[tx_id] === 'pending') {
-      //   // const { http_server } = JSON.parse(new TextDecoder().decode(message))
-      //   // console.log(`json`, http_server)
-      //   if (message) {
-      //     const { body, headers, ...rest }: { body: any; headers: Map<string, string> } = message
-      //     const parsedHeaders: { [key: string]: string } = {}
+      if (messageStatusMap.get(tx_id) === 'pending' && message) {
+        const { body, headers, ...rest }: { body: any; headers: Map<string, string> } = message
+        const parsedHeaders: { [key: string]: string } = {}
 
-      //     for (const [key, value] of headers.entries()) {
-      //       parsedHeaders[key] = value
-      //     }
+        for (const [key, value] of headers.entries()) {
+          parsedHeaders[key] = value
+        }
 
-      //     const parsedBody = new TextDecoder().decode(new Uint8Array(body))
-      //     console.log(`parsed`, { ...rest, headers: parsedHeaders, body: parsedBody })
+        const parsedBody = new TextDecoder().decode(new Uint8Array(body))
 
-      //     MESSAGE.current[tx_id] = JSON.stringify({ ...rest, headers: parsedHeaders, body: parsedBody })
-      //   }
-      // }
-      console.groupEnd()
+        console.log(`parsed`, { ...rest, headers: parsedHeaders, body: parsedBody })
+
+        messageStatusMap.set(tx_id, JSON.stringify({ ...rest, headers: parsedHeaders, body: parsedBody }))
+      }
     },
-    async (relay: any, prev: String) => {
-      // console.group('on builtin message')
-      // console.log(relay)
-      // console.log(prev)
-      // console.groupEnd()
-    }
+    async (relay: any, prev: String) => {}
   )
 
   await client_?.listen(callback)
@@ -189,7 +150,7 @@ onMessage('init-background', async ({ data }) => {
 
 async function fetchPeers(): Promise<Peer[]> {
   if (!currentClient) return []
-  return currentClient.list_peers()
+  return await currentClient.list_peers()
 }
 
 async function sendRingsMessage(to: string, message: string) {
@@ -222,7 +183,7 @@ async function acceptAnswer(transportId: any, answer: any) {
   }
 }
 
-async function disconnect(address: string, addr_type?: number) {
+async function disconnect(address: string, addr_type?: ADDRESS_TYPE) {
   if (currentClient && address) {
     return await currentClient.disconnect(address, addr_type)
   }
@@ -261,6 +222,46 @@ function getServiceNodes(serviceType = 'ipfs_provider') {
   return serviceNodes.get(serviceType)
 }
 
+async function asyncSendMessage(message: HttpMessageProps) {
+  if (!currentClient) return Promise.reject('Not Connected to Node')
+
+  const { destination, method, path, headers } = message
+  const txId = (await currentClient.send_http_request(
+    destination,
+    'ipfs',
+    method,
+    path,
+    BigInt(5000),
+    headers
+  )) as string
+
+  console.log('txId', txId)
+
+  messageStatusMap.set(txId, 'pending')
+
+  const timer = window.setInterval(() => {
+    if (messageStatusMap.get(txId) && messageStatusMap.get(txId) !== 'pending') {
+      clearInterval(messageIntervalMap.get(txId))
+
+      messageIntervalMap.delete(txId)
+      messageStatusMap.delete(txId)
+    }
+  }, 1000)
+  messageIntervalMap.set(txId, timer)
+
+  const promise = new Promise<{ success: boolean }>((resolve, reject) => {
+    messagePromiseMap.set(txId, { resolve, reject })
+  })
+
+  try {
+    return await promise
+  } catch (error) {
+    Promise.reject(error)
+  } finally {
+    messagePromiseMap.delete(txId)
+  }
+}
+
 function destroyClient() {
   if (currentClient) {
     clients.includes(currentClient) &&
@@ -276,7 +277,15 @@ function destroyClient() {
   }
 }
 
-async function createRingsNodeClient({ turnUrl, account }: { turnUrl: string; account: string }) {
+async function createRingsNodeClient({
+  turnUrl,
+  account,
+  nodeUrl,
+}: {
+  turnUrl: string
+  account: string
+  nodeUrl: string
+}) {
   if (currentClient && currentAccount === account) {
     return
   }
@@ -299,6 +308,7 @@ async function createRingsNodeClient({ turnUrl, account }: { turnUrl: string; ac
   console.log({
     account,
     turnUrl,
+    nodeUrl,
     signed,
     auth: unsignedInfo.auth,
     signature,
@@ -310,3 +320,26 @@ async function createRingsNodeClient({ turnUrl, account }: { turnUrl: string; ac
   clients.push(client_)
   return client_
 }
+
+// Provider
+// client: Client | null,
+// fetchPeers: () => Promise<Peer[]>,
+// sendMessage: (to: string, message: string) => Promise<void>,
+// connectByAddress: (address: string) => Promise<void>,
+// createOffer: () => Promise<void>,
+// answerOffer: (offer: any) => Promise<void>,
+// acceptAnswer: (transportId: any, answer: any) => Promise<void>,
+// turnUrl: string,
+// setTurnUrl: (turnUrl: string) => void,
+// nodeUrl: string,
+// setNodeUrl: (nodeUrl: string) => void,
+// status: string,
+// node: string,
+// nodeStatus: string,
+// setStatus: (status: string) => void,
+// disconnect: () => void,
+// state: StateProps,
+// dispatch: React.Dispatch<any>,
+// startChat: (peer: string) => void,
+// endChat: (peer: string) => void,
+// asyncSendMessage: (message: HttpMessageProps) => Promise<any>

@@ -103,6 +103,7 @@ function help() {
   console.log(`Support request methods:
 fetchPeers,
 sendMessage,
+asyncSendMessage,
 connectByAddress,
 createOffer,
 answerOffer,

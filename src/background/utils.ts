@@ -1,3 +1,21 @@
+export interface HttpMessageProps {
+  destination: string
+  method: string
+  path: string
+  headers: any
+}
+
+export interface Peer {
+  address: string
+  state: string | undefined
+  transport_pubkey: string
+  transport_id: string
+  name: string
+  bns: string
+  ens: string
+  type: ADDRESS_TYPE
+}
+
 export enum ADDRESS_TYPE {
   DEFAULT,
   ED25519,
@@ -17,7 +35,7 @@ export const getAddressWithType = (address: string) => {
   const len = _address.length
 
   switch (len) {
-    // etherum address
+    // ethereum address
     // case 40:
     //   return { type: ADDRESS_TYPE.DEFAULT, address: `0x${_address.toLowerCase()}` }
     // solana address
@@ -30,7 +48,7 @@ export const getAddressWithType = (address: string) => {
     case 62:
       return { type: ADDRESS_TYPE.APTOS, address: `0x${_address.toLowerCase()}` }
     default:
-      // etherum address
+      // ethereum address
       return { type: ADDRESS_TYPE.DEFAULT, address: `0x${_address.toLowerCase()}` }
   }
 }
