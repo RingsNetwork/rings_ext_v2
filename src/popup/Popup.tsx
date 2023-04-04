@@ -74,6 +74,7 @@ export function Popup() {
   }, [])
 
   useEffect(() => {
+    getPeers()
     const timer = window.setInterval(() => {
       getPeers()
     }, 5000)
