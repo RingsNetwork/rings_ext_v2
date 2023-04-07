@@ -57,7 +57,7 @@ specifiers:
   vite-plugin-node-stdlib-browser: ^0.2.1
   wagmi: ^0.12.6
   web-ext: ^7.6.0
-  webext-bridge: 6.0.0-rc4
+  webext-bridge: 6.0.1
   webextension-polyfill: ^0.10.0
 
 dependencies:
@@ -116,7 +116,7 @@ devDependencies:
   vite-plugin-eslint: 1.8.1_eslint@8.36.0+vite@4.2.1
   vite-plugin-node-stdlib-browser: 0.2.1_pmujviwajsnxwuo4rmonxflbxq
   web-ext: 7.6.0
-  webext-bridge: 6.0.0-rc4
+  webext-bridge: 6.0.1
   webextension-polyfill: 0.10.0
 
 packages:
@@ -16722,8 +16722,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /webext-bridge/6.0.0-rc4:
-    resolution: {integrity: sha512-VccfXtCsBdVu/sC6NG+t42dFGRTvfs9+mX6xGHTUxX7E46r3oAXyvnjz0IWH2orbV8aGBiSjsbFOUMVkih4KXQ==}
+  /webext-bridge/6.0.1:
+    resolution: {integrity: sha512-GruIrN+vNwbxVCi8UW4Dqk5YkcGA9V0ZfJ57jXP9JXHbrsDs5k2N6NNYQR5e+wSCnQpGYOGAGihwUpKlhg8QIw==}
     dependencies:
       '@types/webextension-polyfill': 0.8.3
       nanoevents: 6.0.2

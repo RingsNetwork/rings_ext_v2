@@ -4,6 +4,15 @@ import browser from 'webextension-polyfill'
 
 import { hexToBytes } from '~/utils'
 
+import {
+  connected,
+  connectedServiceNode,
+  connecting,
+  disconnected,
+  initFailed,
+  initSuccess,
+  receiveMessage,
+} from './emits'
 import { ADDRESS_TYPE, getAddressWithType, handlerError, HttpMessageProps, Peer } from './utils'
 
 browser.runtime.onInstalled.addListener((): void => {
@@ -95,17 +104,14 @@ onMessage('init-background', async ({ data }) => {
       console.log(`to`, to)
       console.groupEnd()
 
-      // dispatch({
-      //   type: RECEIVE_MESSAGE,
-      //   payload: {
-      //     peer: from,
-      //     message: {
-      //       from,
-      //       to,
-      //       // message: new TextDecoder().decode(message)
-      //     },
-      //   },
-      // })
+      receiveMessage({
+        peer: from,
+        message: {
+          from,
+          to,
+          message: new TextDecoder().decode(message),
+        },
+      })
     },
     // http response message
     async (response: any, message: any) => {
@@ -133,6 +139,7 @@ onMessage('init-background', async ({ data }) => {
   const promises = data.nodeUrl.split(';').map(async (url: string) => await client_?.connect_peer_via_http(url))
   await Promise.any(promises)
 
+  connected()
   invokeFindServiceNode()
 
   const info = await client_?.get_node_info()
@@ -215,6 +222,12 @@ async function findServiceNode(serviceType = 'ipfs_provider') {
   if (currentClient && !serviceNodes.get(serviceType)?.length) {
     const nodes = await currentClient.lookup_service(serviceType)
     serviceNodes.set(serviceType, nodes)
+
+    if (nodes && nodes.length) {
+      connectedServiceNode({
+        nodes,
+      })
+    }
   }
 }
 
@@ -262,6 +275,10 @@ async function asyncSendMessage(message: HttpMessageProps) {
   }
 }
 
+/**
+ * client methods
+ */
+
 function destroyClient() {
   if (currentClient) {
     clients.includes(currentClient) &&
@@ -275,6 +292,8 @@ function destroyClient() {
   if (currentAccount) {
     currentAccount = undefined
   }
+
+  disconnected()
 }
 
 async function createRingsNodeClient({
@@ -291,7 +310,12 @@ async function createRingsNodeClient({
   }
   // init wasm
   if (!wasmInit) {
-    wasmInit = await init(browser.runtime.getURL('dist/background/rings_node_bg.wasm'))
+    try {
+      wasmInit = await init(browser.runtime.getURL('dist/background/rings_node_bg.wasm'))
+      initSuccess()
+    } catch (error) {
+      initFailed()
+    }
   }
 
   // prepare auth & send to metamask for sign
@@ -313,6 +337,8 @@ async function createRingsNodeClient({
     auth: unsignedInfo.auth,
     signature,
   })
+
+  connecting()
 
   let client_: Client = await Client.new_client(unsignedInfo, signature, turnUrl)
   currentAccount = account

@@ -107,7 +107,7 @@
     "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-node-stdlib-browser": "^0.2.1",
     "web-ext": "^7.6.0",
-    "webext-bridge": "6.0.0-rc4",
+    "webext-bridge": "6.0.1",
     "webextension-polyfill": "^0.10.0"
   },
   "pnpm": {

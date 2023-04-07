@@ -49,6 +49,7 @@ declare module 'webext-bridge' {
         type: number
       }[]
     >
+    event: { name: string; data: any }
   }
 }
 

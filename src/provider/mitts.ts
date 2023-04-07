@@ -62,17 +62,8 @@ export function createProvider() {
       case 'request':
         requestHandler(payload, promiseMap)
         break
-      case 'accountChange':
-        // do something
-        break
-      case 'connected':
-        // do something
-        break
-      case 'disconnected':
-        // do something
-        break
-      case 'onMessage':
-        // do something
+      case 'event':
+        emitter.emit(payload.name, payload.data)
         break
       default:
         break
@@ -111,4 +102,16 @@ acceptAnswer,
 disconnect,
 getNodeInfo,
 getServiceNodes`)
+
+  console.log(`Support events:
+| 'changeName'
+| 'activeChat'
+| 'endChat'
+| 'receiveMessage'
+| 'initSuccess'
+| 'initFailed'
+| 'connectedServiceNode'
+| 'connecting'
+| 'connected'
+| 'disconnected',`)
 }

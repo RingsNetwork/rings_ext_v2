@@ -29,6 +29,15 @@ const setupPageStream = () => {
       })
     }
   })
+
+  onMessage('event', async ({ data }) => {
+    if (data?.name) {
+      pageStream.write({
+        type: 'event',
+        payload: data,
+      })
+    }
+  })
 }
 
 // init stream
