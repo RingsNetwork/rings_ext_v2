@@ -92,26 +92,26 @@ function requestHandler(payload: Record<string, any>, promiseMap: Map<any, any>)
 
 function help() {
   console.log(`Support request methods:
-fetchPeers,
-sendMessage,
-asyncSendMessage,
-connectByAddress,
-createOffer,
-answerOffer,
-acceptAnswer,
-disconnect,
-getNodeInfo,
-getServiceNodes`)
+| fetchPeers
+| sendMessage
+| asyncSendMessage
+| connectByAddress
+| createOffer
+| answerOffer
+| acceptAnswer
+| disconnect
+| getNodeInfo
+| getServiceNodes`)
 
   console.log(`Support events:
-| 'changeName'
-| 'activeChat'
-| 'endChat'
-| 'receiveMessage'
-| 'initSuccess'
-| 'initFailed'
-| 'connectedServiceNode'
-| 'connecting'
-| 'connected'
-| 'disconnected',`)
+| changeName
+| activeChat
+| endChat
+| receiveMessage
+| initSuccess
+| initFailed
+| connectedServiceNode
+| connecting
+| connected
+| disconnected`)
 }
