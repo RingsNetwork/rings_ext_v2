@@ -55,7 +55,10 @@ onMessage('check-status', async () => {
 
 onMessage('destroy-client', destroyClient)
 
-onMessage('get-peers', fetchPeers)
+onMessage('get-peers', async () => {
+  const data = await Promise.all([fetchPeers(), getServiceNodes()])
+  return data
+})
 
 onMessage('request-handler', async ({ data }) => {
   const requestId = data.requestId
@@ -293,6 +296,8 @@ function destroyClient() {
     currentAccount = undefined
   }
 
+  serviceNodes.clear()
+
   disconnected()
 }
 
@@ -346,26 +351,3 @@ async function createRingsNodeClient({
   clients.push(client_)
   return client_
 }
-
-// Provider
-// client: Client | null,
-// fetchPeers: () => Promise<Peer[]>,
-// sendMessage: (to: string, message: string) => Promise<void>,
-// connectByAddress: (address: string) => Promise<void>,
-// createOffer: () => Promise<void>,
-// answerOffer: (offer: any) => Promise<void>,
-// acceptAnswer: (transportId: any, answer: any) => Promise<void>,
-// turnUrl: string,
-// setTurnUrl: (turnUrl: string) => void,
-// nodeUrl: string,
-// setNodeUrl: (nodeUrl: string) => void,
-// status: string,
-// node: string,
-// nodeStatus: string,
-// setStatus: (status: string) => void,
-// disconnect: () => void,
-// state: StateProps,
-// dispatch: React.Dispatch<any>,
-// startChat: (peer: string) => void,
-// endChat: (peer: string) => void,
-// asyncSendMessage: (message: HttpMessageProps) => Promise<any>

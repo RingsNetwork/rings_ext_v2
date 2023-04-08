@@ -68,9 +68,12 @@ export function Popup() {
   }, [])
 
   const [peers, setPeers] = useState<Peer[]>([])
+  const [serviceNodes, setServiceNodes] = useState<string[]>([])
   const getPeers = useCallback(async () => {
     const res = await sendMessage('get-peers', null)
-    setPeers(res)
+
+    setPeers(res[0] ?? [])
+    setServiceNodes(res[1] ?? [])
   }, [])
 
   useEffect(() => {
@@ -86,16 +89,15 @@ export function Popup() {
 
   const contentRef = useRef<HTMLDivElement | null>(null)
 
-  // h-600px
   return (
     <div className="w-358px h-400px flex-col-center font-pixel">
       <div className="w-full h-full">
         <div className="relative p-2.5 flex justify-between items-center border-solid border-b border-gray-300">
           <div className="flex-1 text-xs">RingsNetwork</div>
-          <div className="">
+          <div className="h-7 border-angle fake-border bg-white">
             {connectors.map((connector) => (
               <button
-                className="px-4 py-2 flex-center scale-90 origin-right bg-white text-xs text-black border-angle fake-border active:bg-#2E2E3A active:bg-opacity-5"
+                className="px-4 h-full flex-center text-xs text-black  active:bg-#2E2E3A active:bg-opacity-5"
                 disabled={!connector.ready}
                 key={connector.id}
                 onClick={() => (isConnected ? setShow(!show) : connect({ connector }))}
@@ -180,9 +182,13 @@ export function Popup() {
             </span>
           </div>
           <div className="flex-1">
-            <div className="p-2.5 flex items-center justify-between text-xs">
+            <div className="p-2.5 pt-0 flex items-center justify-between text-xs first:pt-2.5">
               <span className="scale-80 origin-left">Peers:</span>
               <span className="flex-1 text-right scale-80 origin-right">{peers.length}</span>
+            </div>
+            <div className="p-2.5 pt-0 flex items-center justify-between text-xs">
+              <span className="scale-80 origin-left">ServiceNodes:</span>
+              <span className="flex-1 text-right scale-80 origin-right">{serviceNodes.length}</span>
             </div>
           </div>
           <div className="p-2.5 flex items-center justify-between text-xs border-solid border-t border-gray-300">

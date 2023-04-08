@@ -36,19 +36,7 @@ declare module 'webext-bridge' {
       } & Record<string, any>
     >
     'destroy-client': any
-    'get-peers': ProtocolWithReturn<
-      any,
-      {
-        address: string
-        state: string | undefined
-        transport_pubkey: string
-        transport_id: string
-        name: string
-        bns: string
-        ens: string
-        type: number
-      }[]
-    >
+    'get-peers': ProtocolWithReturn<any, any>
     event: { name: string; data: any }
   }
 }
