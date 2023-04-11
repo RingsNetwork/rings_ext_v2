@@ -24,7 +24,7 @@ async function createEvent(
     },
     {
       context: 'content-script',
-      tabId: tabs[0].id!,
+      tabId: tabs?.[0]?.id || 0,
     }
   )
 }
