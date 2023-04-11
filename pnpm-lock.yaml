@@ -11,7 +11,7 @@ specifiers:
   '@metamask/post-message-stream': ^6.1.1
   '@metamask/providers': ^10.2.1
   '@ringsnetwork/bns-util': ^0.9.1
-  '@ringsnetwork/rings-node': 0.2.5-dev-20230331.0
+  '@ringsnetwork/rings-node': 0.2.5-dev-20230411.0
   '@rollup/plugin-replace': ^5.0.2
   '@types/document-ready': ^2.0.0
   '@types/fs-extra': ^11.0.1
@@ -65,7 +65,7 @@ dependencies:
   '@metamask/post-message-stream': 6.1.1
   '@metamask/providers': 10.2.1
   '@ringsnetwork/bns-util': 0.9.1_typescript@4.9.3
-  '@ringsnetwork/rings-node': 0.2.5-dev-20230331.0
+  '@ringsnetwork/rings-node': 0.2.5-dev-20230411.0
   '@unocss/reset': 0.50.6
   buffer: 6.0.3
   document-ready: 2.0.2
@@ -2390,7 +2390,7 @@ packages:
       lodash: 4.17.21
       semver: 6.3.0
       table: 6.8.1
-      undici: 5.21.0
+      undici: 5.21.2
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -2639,8 +2639,8 @@ packages:
       - web3-utils
     dev: false
 
-  /@ringsnetwork/rings-node/0.2.5-dev-20230331.0:
-    resolution: {integrity: sha512-ERov+MHFNUy+rUQB1OpnU2DUZ6u2oCqrZVEq2gNVg4QuMraDRVp064xYq/pJHvD21cQWLvhEzYRB4nbr1OvCFg==}
+  /@ringsnetwork/rings-node/0.2.5-dev-20230411.0:
+    resolution: {integrity: sha512-uP6m5mrEiNOT+YXs1eOgCghoYtYJjBXtCBAYtq3n98u5f3ekzUATaNKO+Ht7qq0IZZj5+pK7ihQMqCsCLsRjSA==}
     dev: false
 
   /@rollup/plugin-inject/5.0.3:
@@ -15262,6 +15262,13 @@ packages:
 
   /undici/5.21.0:
     resolution: {integrity: sha512-HOjK8l6a57b2ZGXOcUsI5NLfoTrfmbOl90ixJDl0AEFG4wgHNDQxtZy15/ZQp7HhjkpaGlp/eneMgtsu1dIlUA==}
+    engines: {node: '>=12.18'}
+    dependencies:
+      busboy: 1.6.0
+    dev: false
+
+  /undici/5.21.2:
+    resolution: {integrity: sha512-f6pTQ9RF4DQtwoWSaC42P/NKlUjvezVvd9r155ohqkwFNRyBKM3f3pcty3ouusefNRyM25XhIQEbeQ46sZDJfQ==}
     engines: {node: '>=12.18'}
     dependencies:
       busboy: 1.6.0
