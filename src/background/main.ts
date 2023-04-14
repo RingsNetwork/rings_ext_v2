@@ -282,8 +282,9 @@ async function asyncSendMessage(message: HttpMessageProps) {
  * client methods
  */
 
-function destroyClient() {
+async function destroyClient() {
   if (currentClient) {
+    await currentClient.disconnect_all()
     clients.includes(currentClient) &&
       clients.splice(
         clients.findIndex((c) => currentClient === c),

@@ -11,7 +11,7 @@ specifiers:
   '@metamask/post-message-stream': ^6.1.1
   '@metamask/providers': ^10.2.1
   '@ringsnetwork/bns-util': ^0.9.1
-  '@ringsnetwork/rings-node': 0.2.5-dev-20230411.0
+  '@ringsnetwork/rings-node': 0.2.5-dev-20230412.0
   '@rollup/plugin-replace': ^5.0.2
   '@types/document-ready': ^2.0.0
   '@types/fs-extra': ^11.0.1
@@ -65,7 +65,7 @@ dependencies:
   '@metamask/post-message-stream': 6.1.1
   '@metamask/providers': 10.2.1
   '@ringsnetwork/bns-util': 0.9.1_typescript@4.9.3
-  '@ringsnetwork/rings-node': 0.2.5-dev-20230411.0
+  '@ringsnetwork/rings-node': 0.2.5-dev-20230412.0
   '@unocss/reset': 0.50.6
   buffer: 6.0.3
   document-ready: 2.0.2
@@ -2639,8 +2639,8 @@ packages:
       - web3-utils
     dev: false
 
-  /@ringsnetwork/rings-node/0.2.5-dev-20230411.0:
-    resolution: {integrity: sha512-uP6m5mrEiNOT+YXs1eOgCghoYtYJjBXtCBAYtq3n98u5f3ekzUATaNKO+Ht7qq0IZZj5+pK7ihQMqCsCLsRjSA==}
+  /@ringsnetwork/rings-node/0.2.5-dev-20230412.0:
+    resolution: {integrity: sha512-Iumc79eri9GCPpb8YOKQ/qp+8+v76FWzLeGeJQx/+JLq/luqFy48pUPgkuKozdP9pHOBT1MTIUWPP9/Y2soKLg==}
     dev: false
 
   /@rollup/plugin-inject/5.0.3:
