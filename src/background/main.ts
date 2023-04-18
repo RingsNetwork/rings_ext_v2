@@ -27,7 +27,7 @@ let currentAccount: string | undefined
 let serviceNodes = new Map<string, any[]>()
 
 let messagePromiseMap = new Map<string, { resolve: Function; reject: Function }>()
-let messageStatusMap = new Map<string, any>()
+let messageStatusMap = new Map<string, string | Record<string, any>>()
 let messageIntervalMap = new Map<string, number>()
 
 /**
@@ -112,7 +112,7 @@ onMessage('init-background', async ({ data }) => {
         message: {
           from,
           to,
-          message: new TextDecoder().decode(message),
+          // message: new TextDecoder().decode(message),
         },
       })
     },
@@ -131,7 +131,10 @@ onMessage('init-background', async ({ data }) => {
 
         console.log(`parsed`, { ...rest, headers: parsedHeaders, body: parsedBody })
 
-        messageStatusMap.set(tx_id, JSON.stringify({ ...rest, headers: parsedHeaders, body: parsedBody }))
+        messageStatusMap.set(
+          tx_id,
+          JSON.stringify({ ...rest, headers: parsedHeaders, body: parsedBody, rawBody: body })
+        )
       }
     },
     async (relay: any, prev: String) => {}
@@ -259,6 +262,7 @@ async function asyncSendMessage(message: HttpMessageProps) {
     if (messageStatusMap.get(txId) && messageStatusMap.get(txId) !== 'pending') {
       clearInterval(messageIntervalMap.get(txId))
 
+      messagePromiseMap.get(txId)?.resolve(messageStatusMap.get(txId))
       messageIntervalMap.delete(txId)
       messageStatusMap.delete(txId)
     }
