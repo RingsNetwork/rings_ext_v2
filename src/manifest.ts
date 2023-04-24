@@ -16,7 +16,7 @@ export async function getManifest() {
     version: pkg.version,
     description: pkg.description,
     browser_action: {
-      default_icon: './assets/icon-512.png',
+      default_icon: './assets/waiting_icon.png',
       default_popup: './dist/popup/index.html',
     },
     options_ui: {
@@ -29,21 +29,22 @@ export async function getManifest() {
       persistent: true,
     },
     icons: {
-      16: './assets/icon-512.png',
-      48: './assets/icon-512.png',
-      128: './assets/icon-512.png',
+      16: './assets/active_icon_16.png',
+      48: './assets/active_icon_48.png',
+      128: './assets/active_icon_128.png',
+      512: './assets/active_icon_512.png',
     },
     permissions: ['tabs', 'storage', 'activeTab', 'http://*/', 'https://*/'],
     // host_permissions: ['*://*/*'],
     content_scripts: [
       {
         matches: ['http://*/*', 'https://*/*'],
-        js: ['./dist/contentScripts/index.global.js'],
+        js: [isDev ? './dist/contentScripts/index.js' : './dist/contentScripts/index.global.js'],
       },
     ],
     web_accessible_resources: [
       'dist/contentScripts/style.css',
-      'dist/contentScripts/inpage.js',
+      isDev ? 'dist/contentScripts/inpage.js' : 'dist/contentScripts/inpage.global.js',
       'dist/background/rings_node_bg.wasm',
     ],
     content_security_policy: isDev

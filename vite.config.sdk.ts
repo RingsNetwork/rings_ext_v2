@@ -19,7 +19,7 @@ export default defineConfig({
     sourcemap: isDev ? 'inline' : false,
     lib: {
       entry: r('src/contentScripts/inpage.ts'),
-      formats: ['umd'],
+      formats: ['es'],
       name: 'ringsNode',
     },
     rollupOptions: {

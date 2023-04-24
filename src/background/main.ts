@@ -20,6 +20,17 @@ browser.runtime.onInstalled.addListener((): void => {
   console.log('Extension installed')
 })
 
+function toggleIcon(type = 'active') {
+  browser.browserAction.setIcon({
+    path: {
+      16: `./assets/${type}_icon_16.png`,
+      48: `./assets/${type}_icon_48.png`,
+      128: `./assets/${type}_icon_128.png`,
+      512: `./assets/${type}_icon_512.png`,
+    },
+  })
+}
+
 let wasmInit: any = null
 let currentClient: Client | null = null
 let clients: Client[] = []
@@ -53,7 +64,10 @@ onMessage('check-status', async () => {
   }
 })
 
-onMessage('destroy-client', destroyClient)
+onMessage('destroy-client', () => {
+  destroyClient()
+  toggleIcon('waiting')
+})
 
 onMessage('get-peers', async () => {
   const data = await Promise.all([fetchPeers(), getServiceNodes()])
@@ -150,6 +164,7 @@ onMessage('init-background', async ({ data }) => {
 
   const info = await client_?.get_node_info()
   console.log(info)
+  toggleIcon()
 
   return {
     clients,
