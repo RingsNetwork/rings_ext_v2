@@ -207,7 +207,7 @@ async function answerOffer(offer: string) {
 
 async function acceptAnswer(transportId: any, answer: any) {
   if (currentClient && transportId) {
-    return await currentClient.accept_answer(transportId, answer)
+    return await currentClient.accept_answer(answer)
   }
 }
 
