@@ -1,3 +1,5 @@
 import { createProvider } from '../provider/mitts'
 
-window.rings = createProvider()
+export default (() => {
+  window.rings = createProvider()
+})()

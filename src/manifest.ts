@@ -39,12 +39,12 @@ export async function getManifest() {
     content_scripts: [
       {
         matches: ['http://*/*', 'https://*/*'],
-        js: [isDev ? './dist/contentScripts/index.js' : './dist/contentScripts/index.global.js'],
+        js: ['./dist/contentScripts/index.global.js'],
       },
     ],
     web_accessible_resources: [
       'dist/contentScripts/style.css',
-      isDev ? 'dist/contentScripts/inpage.js' : 'dist/contentScripts/inpage.global.js',
+      'dist/contentScripts/inpage.global.js',
       'dist/background/rings_node_bg.wasm',
     ],
     content_security_policy: isDev

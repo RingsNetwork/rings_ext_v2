@@ -19,12 +19,12 @@ export default defineConfig({
     sourcemap: isDev ? 'inline' : false,
     lib: {
       entry: r('src/contentScripts/index.tsx'),
-      formats: ['es'],
+      formats: ['iife'],
       name: 'ringsContent',
     },
     rollupOptions: {
       output: {
-        entryFileNames: 'index.js',
+        entryFileNames: 'index.global.js',
       },
     },
   },

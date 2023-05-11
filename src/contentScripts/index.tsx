@@ -63,10 +63,7 @@ const setupPageStream = () => {
   const scriptEl = document.createElement('script')
   const shadowDOM = container.attachShadow?.({ mode: __DEV__ ? 'open' : 'closed' }) || container
 
-  scriptEl.setAttribute(
-    'src',
-    browser.runtime.getURL(__DEV__ ? 'dist/contentScripts/inpage.js' : 'dist/contentScripts/inpage.global.js')
-  )
+  scriptEl.setAttribute('src', browser.runtime.getURL('dist/contentScripts/inpage.global.js'))
   // styleEl.setAttribute('rel', 'stylesheet')
   // styleEl.setAttribute('href', browser.runtime.getURL('dist/contentScripts/style.css'))
 
@@ -78,3 +75,5 @@ const setupPageStream = () => {
   // $root.render(<App />)
   shadowDOM.removeChild(scriptEl)
 })()
+
+export default {}
