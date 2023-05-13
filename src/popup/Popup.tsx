@@ -43,6 +43,7 @@ export function Popup() {
   useEffect(() => {
     ;(async () => {
       const data = await getStorage('serverUrls')
+      console.log(data[0])
       if (data && data[0]) {
         setUrls(data[0])
       }
@@ -60,15 +61,22 @@ export function Popup() {
         address_ = data.account
       }
       if (address_) {
+        let _urls = {}
+        if (!urls.nodeUrl) {
+          _urls = (await getStorage('serverUrls'))[0]
+        }
+
         const data = await sendMessage('init-background', {
           account: address_,
           ...urls,
+          ..._urls,
         })
 
         setClients(data.clients)
       }
     } catch (error) {
       console.error(error)
+      throw Error(JSON.stringify(error))
     } finally {
       setLoading(false)
     }
@@ -81,6 +89,12 @@ export function Popup() {
     const data = await sendMessage('check-status', null)
     setClients(data.clients)
   }, [])
+
+  const connectHandler = useCallback(async () => {
+    if (!clients.length) {
+      await createClient()
+    }
+  }, [clients, createClient])
 
   const [peers, setPeers] = useState<Peer[]>([])
   const [serviceNodes, setServiceNodes] = useState<string[]>([])
@@ -107,7 +121,7 @@ export function Popup() {
   const [switcherShow, setSwitcherShow] = useState(false)
 
   return new URLSearchParams(location.search).get('notification') ? (
-    <NotificationPage />
+    <NotificationPage connectHandler={connectHandler} />
   ) : (
     <div className="w-358px h-400px flex-col-center font-pixel antialiased">
       <div className="w-full h-full">
@@ -137,7 +151,7 @@ export function Popup() {
               } ${loading ? 'scale-x-0' : ''}`}
               onClick={() => {
                 if (!clients.length) {
-                  createClient()
+                  connectHandler()
                 } else {
                   setShow(!show)
                 }
@@ -200,7 +214,7 @@ export function Popup() {
               </span>
             </span>
             <span
-              className="flex-1 text-right scale-80 origin-right cursor-pointer transition-all hover:translate-x-.25"
+              className="flex-1 text-right scale-80 origin-right cursor-pointer transition-all hover:translate-x-.25 underline underline-current"
               onClick={() => {
                 if (clients.length > 0) {
                   destroyClient()

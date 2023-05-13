@@ -4,12 +4,11 @@ const NOTIFICATION_WIDTH = 358
 const NOTIFICATION_HEIGHT = 400
 
 const showNotification = async (query: Record<string, string> = {}, windowInfo: any) => {
-  console.log(query)
   const { screenX, screenY, outerWidth } = windowInfo
   let top = Math.max(screenY, 0)
   let left = Math.max(screenX + (outerWidth - NOTIFICATION_WIDTH), 0)
 
-  browser.windows.create({
+  await browser.windows.create({
     type: 'popup',
     url: `/dist/popup/index.html?${new URLSearchParams({
       notification: 'true',
@@ -19,6 +18,13 @@ const showNotification = async (query: Record<string, string> = {}, windowInfo: 
     height: NOTIFICATION_HEIGHT,
     top,
     left,
+  })
+
+  return new Promise((resolve, reject) => {
+    // JS GC Error ?
+    browser.windows.onRemoved.addListener((id) => {
+      resolve(id)
+    })
   })
 }
 
