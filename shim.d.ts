@@ -29,6 +29,8 @@ declare module 'webext-bridge' {
       {
         type: string
         requestId: number
+        params?: Record<string, any>
+        method?: string
       } & Record<string, any>,
       {
         success?: boolean

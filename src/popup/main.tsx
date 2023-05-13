@@ -1,7 +1,7 @@
 import ready from 'document-ready'
 import { createRoot } from 'react-dom/client'
 import { configureChains, createConfig, WagmiConfig } from 'wagmi'
-import { arbitrum, arbitrumGoerli, bsc, bscTestnet, goerli, mainnet, polygon } from 'wagmi/chains'
+import { arbitrum, bsc, mainnet, polygon } from 'wagmi/chains'
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
 import { publicProvider } from 'wagmi/providers/public'
 
@@ -14,7 +14,7 @@ import 'uno.css'
 import './assets/styles/index.css'
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [arbitrum, arbitrumGoerli, bsc, bscTestnet, mainnet, polygon, goerli],
+  [arbitrum, bsc, mainnet, polygon],
   [publicProvider()]
 )
 

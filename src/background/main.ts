@@ -13,6 +13,7 @@ import {
   initSuccess,
   receiveMessage,
 } from './emits'
+import { showNotification } from './notification'
 import { ADDRESS_TYPE, getAddressWithType, handlerError, HttpMessageProps, Peer } from './utils'
 
 browser.runtime.onInstalled.addListener((): void => {
@@ -45,6 +46,8 @@ let messageIntervalMap = new Map<string, number>()
  * inpage provider request method map
  */
 const requestHandlerMap: Record<string, any> = {
+  connectRings,
+  setUrls,
   fetchPeers,
   sendMessage: sendRingsMessage,
   asyncSendMessage,
@@ -75,11 +78,11 @@ onMessage('get-peers', async () => {
 })
 
 onMessage('request-handler', async ({ data }) => {
-  const requestId = data.requestId
-  const method = data.method
-  if (requestHandlerMap[method]) {
+  const { requestId, method, params, windowInfo } = data
+
+  if (method && requestHandlerMap[method]) {
     try {
-      const data = await requestHandlerMap[method]()
+      const data = await requestHandlerMap[method](params, windowInfo)
       return {
         success: true,
         requestId,
@@ -174,6 +177,28 @@ onMessage('init-background', async ({ data }) => {
 
 /**
  * inpage methods
+ */
+
+/**
+ * extension method
+ */
+
+async function connectRings(query: Record<string, string> = {}, windowInfo?: any) {
+  showNotification(
+    {
+      ...query,
+      a: '1',
+    },
+    windowInfo
+  )
+}
+
+async function setUrls(urls: { turnUrl: string; nodeUrl: string }[]) {
+  console.log(urls)
+}
+
+/**
+ * client instance methods
  */
 
 async function fetchPeers(): Promise<Peer[]> {

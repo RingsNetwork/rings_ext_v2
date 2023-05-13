@@ -22,7 +22,13 @@ const setupPageStream = () => {
 
   pageStream.on('data', async (data) => {
     if (data?.type === 'request') {
-      const res = await sendMessage('request-handler', data as any)
+      const { screenX, screenY, outerWidth } = window
+
+      const res = await sendMessage('request-handler', {
+        ...data,
+        windowInfo: { screenX, screenY, outerWidth },
+      } as any)
+
       pageStream.write({
         type: 'request',
         payload: res,
@@ -48,7 +54,7 @@ const setupPageStream = () => {
 // Firefox `browser.tabs.executeScript()` requires scripts return a primitive value
 // eslint-disable-next-line import/newline-after-import
 ;(() => {
-  console.info('[webext-template] Hello world from content script')
+  console.info('%c ringsnetwork ', 'background: #15CD96; color: white', 'welcome!')
 
   // communication example: send previous tab title from background page
   onMessage('tab-prev', ({ data }) => {

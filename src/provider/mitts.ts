@@ -85,13 +85,15 @@ export function createProvider() {
 
 function requestHandler(payload: Record<string, any>, promiseMap: Map<any, any>) {
   const { requestId, success } = payload
-  const _promise = promiseMap.get(payload['requestId'])
-  _promise[success ? 'resolve' : 'reject'](payload)
+
+  promiseMap.get(payload['requestId'])?.[success ? 'resolve' : 'reject'](payload)
   promiseMap.delete(requestId)
 }
 
 function help() {
   console.log(`Support request methods:
+| connectRings,
+| setUrls,
 | fetchPeers
 | sendMessage
 | asyncSendMessage

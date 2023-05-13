@@ -1,12 +1,14 @@
 import { shorten } from '@did-network/dapp-sdk'
-import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import { useAccount, useConnect, useDisconnect, useNetwork } from 'wagmi'
 import { signMessage } from 'wagmi/actions'
 import { onMessage, sendMessage } from 'webext-bridge/popup'
 
 import type { Peer } from '../background/utils'
+import { NetworkSwitcher } from './components/SwitchNetworks'
 
 export function Popup() {
   const { address, isConnected } = useAccount()
+  const { chain } = useNetwork()
   const { connect, connectors, isLoading, pendingConnector, connectAsync } = useConnect()
   const { disconnect } = useDisconnect()
 
@@ -89,8 +91,10 @@ export function Popup() {
 
   const contentRef = useRef<HTMLDivElement | null>(null)
 
+  const [switcherShow, setSwitcherShow] = useState(false)
+
   return (
-    <div className="w-358px h-400px flex-col-center font-pixel">
+    <div className="w-358px h-400px flex-col-center font-pixel antialiased">
       <div className="w-full h-full">
         <div className="relative p-2.5 flex justify-between items-center border-solid border-b border-gray-300">
           <div className="flex-1 text-xs">RingsNetwork</div>
@@ -154,14 +158,14 @@ export function Popup() {
 
       {/* <!-- modal --> */}
       <div
-        className={`fixed top-0 left-0 right-0 bottom-0 bg-transparent ${show ? 'block' : '!hidden'} `}
+        className={`fixed top-0 left-0 right-0 bottom-0 bg-gray/10 ${show ? 'block' : '!hidden'} `}
         onClick={(e) => {
           !contentRef.current?.contains(e.target as Node) && setShow(false)
         }}
       >
         <div
           ref={contentRef}
-          className={`!absolute top-13 right-2.5 flex flex-col items-stretch w-300px h-300px -translate-y-1.5 bg-white border-angle fake-border`}
+          className={`!absolute top-13 right-2.5 flex flex-col items-stretch w-300px h-300px -translate-y-1.5 bg-white border-angle fake-border overflow-hidden`}
         >
           <div className="p-2.5 flex items-center justify-between text-xs border-solid border-b border-gray-300">
             <span className={`scale-80 origin-left`}>
@@ -191,6 +195,27 @@ export function Popup() {
               <span className="flex-1 text-right scale-80 origin-right">{serviceNodes.length}</span>
             </div>
           </div>
+          <div className="relative p-2.5 flex items-center justify-between text-xs border-solid border-t border-gray-300 group">
+            <span className="scale-80 origin-left">Chain: {chain?.name}</span>
+            <span
+              onClick={() => {
+                setSwitcherShow(!switcherShow)
+              }}
+              className="h-full cursor-pointer scale-80 origin-right transition-all hover:translate-x-.25 underline underline-current peer"
+            >
+              Switch
+            </span>
+            <div
+              className={`no-underline absolute bottom-90% right-0 animate-fade-in-right !animate-duration-100 ${
+                switcherShow ? 'block' : 'hidden'
+              }`}
+              onClick={() => {
+                setSwitcherShow(false)
+              }}
+            >
+              <NetworkSwitcher />
+            </div>
+          </div>
           <div className="p-2.5 flex items-center justify-between text-xs border-solid border-t border-gray-300">
             <span className="scale-80 origin-left">Wallet: {shorten(address)}</span>
             <span
@@ -198,7 +223,7 @@ export function Popup() {
                 disconnect()
                 setShow(false)
               }}
-              className="cursor-pointer scale-80 origin-right transition-all hover:translate-x-.25"
+              className="cursor-pointer scale-80 origin-right transition-all hover:translate-x-.25 underline underline-current"
             >
               Disconnect
             </span>
