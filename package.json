@@ -61,6 +61,7 @@
     "buffer": "^6.0.3",
     "document-ready": "^2.0.2",
     "events": "^3.3.0",
+    "jotai": "^2.1.0",
     "metamask-extension-provider": "^3.0.0",
     "mitt": "^3.0.0",
     "process": "^0.11.10",

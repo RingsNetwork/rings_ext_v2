@@ -13,7 +13,7 @@ export function NetworkSwitcher() {
           {chains.map((x) =>
             x.id === chain?.id ? null : (
               <button
-                className="relative flex-col-center px-1.5 h-6 rounded text-xs scale-90 border-angle fake-border"
+                className="relative flex-col-center px-1.5 h-6 rounded text-xs scale-80 origin-right border-angle fake-border"
                 key={x.id}
                 onClick={() => switchNetwork(x.id)}
               >

@@ -184,13 +184,7 @@ onMessage('init-background', async ({ data }) => {
  */
 
 async function connectRings(query: Record<string, string> = {}, windowInfo?: any) {
-  showNotification(
-    {
-      ...query,
-      a: '1',
-    },
-    windowInfo
-  )
+  showNotification(query, windowInfo)
 }
 
 async function setUrls(urls: { turnUrl: string; nodeUrl: string }[]) {

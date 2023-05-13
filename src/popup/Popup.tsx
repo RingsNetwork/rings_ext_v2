@@ -3,8 +3,12 @@ import { useAccount, useConnect, useDisconnect, useNetwork } from 'wagmi'
 import { signMessage } from 'wagmi/actions'
 import { onMessage, sendMessage } from 'webext-bridge/popup'
 
+import { getStorage } from '~/utils/storage'
+
 import type { Peer } from '../background/utils'
 import { NetworkSwitcher } from './components/SwitchNetworks'
+import { NotificationPage } from './Notification'
+import { useServerUrls } from './store'
 
 export function Popup() {
   const { address, isConnected } = useAccount()
@@ -34,8 +38,18 @@ export function Popup() {
   }, [])
 
   const [loading, setLoading] = useState(false)
-  const [turnUrl] = useState('stun://stun.qq.com:3478')
-  const [nodeUrl] = useState('https://41d.1n.gs')
+
+  const { urls, setUrls } = useServerUrls()
+  useEffect(() => {
+    ;(async () => {
+      const data = await getStorage('serverUrls')
+      if (data && data[0]) {
+        setUrls(data[0])
+      }
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const createClient = useCallback(async () => {
     if (loading) return
     try {
@@ -48,8 +62,7 @@ export function Popup() {
       if (address_) {
         const data = await sendMessage('init-background', {
           account: address_,
-          turnUrl,
-          nodeUrl,
+          ...urls,
         })
 
         setClients(data.clients)
@@ -59,7 +72,7 @@ export function Popup() {
     } finally {
       setLoading(false)
     }
-  }, [address, connectAsync, connectors, loading, nodeUrl, turnUrl])
+  }, [address, connectAsync, connectors, loading, urls])
 
   const destroyClient = useCallback(async () => {
     sendMessage('destroy-client', null)
@@ -93,7 +106,9 @@ export function Popup() {
 
   const [switcherShow, setSwitcherShow] = useState(false)
 
-  return (
+  return new URLSearchParams(location.search).get('notification') ? (
+    <NotificationPage />
+  ) : (
     <div className="w-358px h-400px flex-col-center font-pixel antialiased">
       <div className="w-full h-full">
         <div className="relative p-2.5 flex justify-between items-center border-solid border-b border-gray-300">
@@ -141,7 +156,12 @@ export function Popup() {
             <span className="w-80px text-xs scale-90 origin-left">TurnUrl:</span>
             <input
               className="h-7 px-1 flex-1 fake-border outline-none scale-90 origin-right disabled:opacity-60"
-              value={turnUrl}
+              value={urls.turnUrl}
+              onInput={(e) => {
+                setUrls({
+                  turnUrl: (e.target as HTMLInputElement).value,
+                })
+              }}
               disabled={clients.length > 0}
             />
           </div>
@@ -149,7 +169,12 @@ export function Popup() {
             <span className="w-80px text-xs scale-90 origin-left">NodeUrl:</span>
             <input
               className="h-7 px-1 flex-1 fake-border outline-none scale-90 origin-right disabled:opacity-60"
-              value={nodeUrl}
+              value={urls.nodeUrl}
+              onInput={(e) => {
+                setUrls({
+                  nodeUrl: (e.target as HTMLInputElement).value,
+                })
+              }}
               disabled={clients.length > 0}
             />
           </div>
@@ -195,13 +220,13 @@ export function Popup() {
               <span className="flex-1 text-right scale-80 origin-right">{serviceNodes.length}</span>
             </div>
           </div>
-          <div className="relative p-2.5 flex items-center justify-between text-xs border-solid border-t border-gray-300 group">
+          <div className="relative p-2.5 flex items-center justify-between text-xs border-solid border-t border-gray-300">
             <span className="scale-80 origin-left">Chain: {chain?.name}</span>
             <span
               onClick={() => {
                 setSwitcherShow(!switcherShow)
               }}
-              className="h-full cursor-pointer scale-80 origin-right transition-all hover:translate-x-.25 underline underline-current peer"
+              className="h-full cursor-pointer scale-80 origin-right transition-all hover:translate-x-.25 underline underline-current select-none"
             >
               Switch
             </span>
