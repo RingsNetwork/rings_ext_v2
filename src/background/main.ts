@@ -13,7 +13,7 @@ import {
   initSuccess,
   receiveMessage,
 } from './emits'
-import { showNotification } from './notification'
+import { handlerNotification } from './notification'
 import { ADDRESS_TYPE, getAddressWithType, handlerError, HttpMessageProps, Peer } from './utils'
 
 browser.runtime.onInstalled.addListener((): void => {
@@ -78,11 +78,11 @@ onMessage('get-peers', async () => {
 })
 
 onMessage('request-handler', async ({ data }) => {
-  const { requestId, method, params, windowInfo } = data
+  const { requestId, method, params } = data
 
   if (method && requestHandlerMap[method]) {
     try {
-      const data = await requestHandlerMap[method](params, windowInfo)
+      const data = await requestHandlerMap[method](params)
       return {
         success: true,
         requestId,
@@ -183,12 +183,12 @@ onMessage('init-background', async ({ data }) => {
  * extension method
  */
 
-async function connectRings(query: Record<string, string> = {}, windowInfo?: any) {
-  return await showNotification(query, windowInfo)
+async function connectRings(query: Record<string, string> = {}) {
+  return await handlerNotification('connect', query)
 }
 
 async function setUrls(urls: { turnUrl: string; nodeUrl: string }[]) {
-  console.log(urls)
+  return await handlerNotification('setUrls', urls)
 }
 
 /**

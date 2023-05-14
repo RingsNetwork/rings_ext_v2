@@ -1,31 +1,36 @@
 import { windows } from 'webextension-polyfill'
 
+import { useConnectLoading } from './store'
+
 const sleep = (duration = 1000) =>
   new Promise((resolve) => {
     setTimeout(resolve, duration)
   })
 
 export const NotificationPage = ({ connectHandler }: { connectHandler: () => Promise<void> }) => {
-  const [loading, setLoading] = useState(false)
+  const { connectLoading: loading, setConnectLoading: setLoading } = useConnectLoading()
+  const queries = useMemo(() => new URLSearchParams(location.search), [])
 
   useEffect(() => {
-    ;(async () => {
-      if (!loading) {
-        setLoading(true)
-        try {
-          await sleep(700)
-          await connectHandler()
-          setLoading(false)
-        } catch (error) {
-          setLoading(false)
-        } finally {
-          await sleep(700)
-          const { id } = await windows.getCurrent()
-          id && windows.remove(id)
+    console.log(queries.get('pageType'))
+    queries.get('pageType') === 'connect' &&
+      (async () => {
+        if (!loading) {
+          setLoading(true)
+          try {
+            await sleep(700)
+            await connectHandler()
+            setLoading(false)
+          } catch (error) {
+            setLoading(false)
+          } finally {
+            await sleep(700)
+            const { id } = await windows.getCurrent()
+            id && (await windows.remove(id))
+          }
         }
-      }
-    })()
-  }, [connectHandler, loading])
+      })()
+  }, [connectHandler, loading, queries, setLoading])
 
   return (
     <div className="flex flex-col items-center pt-20">

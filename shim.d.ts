@@ -39,6 +39,14 @@ declare module 'webext-bridge' {
     >
     'destroy-client': any
     'get-peers': ProtocolWithReturn<any, any>
+    getWindowInfo: ProtocolWithReturn<
+      any,
+      {
+        screenX: number
+        screenY: number
+        outerWidth: number
+      }
+    >
     event: { name: string; data: any }
   }
 }

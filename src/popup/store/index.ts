@@ -29,3 +29,14 @@ export const useServerUrls = () => {
     setUrls,
   }
 }
+
+const _connectLoading = atom(false)
+
+export const useConnectLoading = () => {
+  const [connectLoading, setConnectLoading] = useAtom(_connectLoading)
+
+  return {
+    connectLoading,
+    setConnectLoading,
+  }
+}

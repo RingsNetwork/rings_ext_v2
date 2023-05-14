@@ -22,12 +22,7 @@ const setupPageStream = () => {
 
   pageStream.on('data', async (data) => {
     if (data?.type === 'request') {
-      const { screenX, screenY, outerWidth } = window
-
-      const res = await sendMessage('request-handler', {
-        ...data,
-        windowInfo: { screenX, screenY, outerWidth },
-      } as any)
+      const res = await sendMessage('request-handler', data as any)
 
       pageStream.write({
         type: 'request',
@@ -43,6 +38,12 @@ const setupPageStream = () => {
         payload: data,
       })
     }
+  })
+
+  onMessage('getWindowInfo', async () => {
+    const { screenX, screenY, outerWidth } = window
+
+    return { screenX, screenY, outerWidth }
   })
 }
 
