@@ -121,7 +121,7 @@ export function Popup() {
   const [switcherShow, setSwitcherShow] = useState(false)
 
   return new URLSearchParams(location.search).get('notification') ? (
-    <NotificationPage connectHandler={connectHandler} />
+    <NotificationPage connectHandler={connectHandler} loading={loading} />
   ) : (
     <div className="w-358px h-400px flex-col-center font-pixel antialiased">
       <div className="w-full h-full">

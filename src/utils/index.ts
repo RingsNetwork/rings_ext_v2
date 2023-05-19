@@ -18,3 +18,8 @@ export function bytesToHex(bytes: number[]) {
   }
   return hex.join('')
 }
+
+export const sleep = (duration = 1000) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, duration)
+  })

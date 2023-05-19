@@ -187,7 +187,7 @@ async function connectRings(query: Record<string, string> = {}) {
   return await handlerNotification('connect', query)
 }
 
-async function setUrls(urls: { turnUrl: string; nodeUrl: string }[]) {
+async function setUrls(urls: { turnUrl: string; nodeUrl: string }) {
   return await handlerNotification('setUrls', urls)
 }
 
