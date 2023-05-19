@@ -2,32 +2,7 @@
 
 - **Nodejs** >= v16.13.0
 - **pnpm** >= v8
-
-## Features
-
-- ⚡️ **Instant HMR** - use **Vite** on dev (no more refresh!)
-- 🌐 React
-- 💬 Effortless communications - powered by [`webext-bridge`](https://github.com/antfu/webext-bridge)
-- 🍃 [tailwindcss](https://tailwindcss.come/) - on-demand CSS utilities
-- 🦾 [TypeScript](https://www.typescriptlang.org/) - type safe
-- 🖥 Content Script - Use React even in content script
-- 🌍 WebExtension - isomorphic extension for Chrome, Firefox, and others
-- 📃 Dynamic `manifest.json` with full type support
-
-## Pre-packed
-
-### WebExtension Libraries
-
-- [`webextension-polyfill`](https://github.com/mozilla/webextension-polyfill) - WebExtension browser API Polyfill with types
-- [`webext-bridge`](https://github.com/antfu/webext-bridge) - effortlessly communication between contexts
-
-### Dev tools
-
-- [TypeScript](https://www.typescriptlang.org/)
-- [pnpm](https://pnpm.js.org/) - fast, disk space efficient package manager
-- [esno](https://github.com/antfu/esno) - TypeScript / ESNext node runtime powered by esbuild
-- [npm-run-all](https://github.com/mysticatea/npm-run-all) - Run multiple npm-scripts in parallel or sequential
-- [web-ext](https://github.com/mozilla/web-ext) - Streamlined experience for developing web extensions
+![image](https://github.com/RingsNetwork/ext_v2/assets/21095710/ffc59941-0cb7-48f5-bda7-2a09201bf616)
 
 ## Usage
 
