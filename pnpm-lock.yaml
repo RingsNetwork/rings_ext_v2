@@ -17,8 +17,8 @@ dependencies:
     specifier: ^0.9.1
     version: 0.9.1(@babel/core@7.21.8)(@nomiclabs/hardhat-web3@2.0.0)(hardhat@2.14.0)(typescript@4.9.5)(web3-core-helpers@1.10.0)(web3-core-promievent@1.10.0)(web3-eth-abi@1.10.0)(web3-utils@1.10.0)(web3@1.10.0)
   '@ringsnetwork/rings-node':
-    specifier: 0.2.5-dev-20230509.3
-    version: 0.2.5-dev-20230509.3
+    specifier: 0.2.5-dev-20230516.0
+    version: 0.2.5-dev-20230516.0
   '@unocss/reset':
     specifier: ^0.50.6
     version: 0.50.6
@@ -3147,8 +3147,8 @@ packages:
       - web3-utils
     dev: false
 
-  /@ringsnetwork/rings-node@0.2.5-dev-20230509.3:
-    resolution: {integrity: sha512-44zDy34SHH3LpzUD0HdncEuzHDoTXN1yp/PJ1EPGXhCYtLqrHhVajtdLEQs8Q7IqDbCjbe7unMqGIBpwn8Vp3g==}
+  /@ringsnetwork/rings-node@0.2.5-dev-20230516.0:
+    resolution: {integrity: sha512-p1cPKYXzl3h7n+0FqaULBY+WZoIUDnqJwqnWLOM/JjZBOpfWbsQblZU7+aQVUlh/C/OLgTGdraoxj7w6+RRkKg==}
     dev: false
 
   /@rollup/plugin-inject@5.0.3:
@@ -9907,7 +9907,7 @@ packages:
       mnemonist: 0.38.5
       mocha: 10.2.0
       p-map: 4.0.0
-      qs: 6.11.1
+      qs: 6.11.2
       raw-body: 2.5.2
       resolve: 1.17.0
       semver: 6.3.0
@@ -13556,6 +13556,13 @@ packages:
 
   /qs@6.11.1:
     resolution: {integrity: sha512-0wsrzgTz/kAVIeuxSjnpGC56rzYtr6JT/2BwEvMaPhFIoYa1aGO8LbzuU1R0uUYQkLpWBTOj0l/CLAJB64J6nQ==}
+    engines: {node: '>=0.6'}
+    dependencies:
+      side-channel: 1.0.4
+    dev: false
+
+  /qs@6.11.2:
+    resolution: {integrity: sha512-tDNIz22aBzCDxLtVH++VnTfzxlfeK5CbqohpSqpJgj1Wg/cQbStNAz3NuqCs5vV+pjBsK4x4pN9HlVh7rcYRiA==}
     engines: {node: '>=0.6'}
     dependencies:
       side-channel: 1.0.4

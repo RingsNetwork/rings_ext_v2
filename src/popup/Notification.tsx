@@ -46,7 +46,7 @@ export const NotificationPage = ({
             ? 'Error'
             : pageStatus === 'success'
             ? 'Connected'
-            : ''}
+            : 'Connecting'}
         </span>
       </span>
     </div>
