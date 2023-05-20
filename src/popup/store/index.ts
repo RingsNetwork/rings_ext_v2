@@ -2,6 +2,8 @@ import { atom, useAtom } from 'jotai'
 
 import { saveStorage } from '~/utils/storage'
 
+import { URL_STORE_KEY } from '../constants/storage-key'
+
 const _urls = atom({
   turnUrl: '',
   nodeUrl: '',
@@ -21,7 +23,7 @@ export const useServerUrls = () => {
       ...prev,
       ...data,
     }))
-    await saveStorage('serverUrls', [{ ...urls, ...data }])
+    await saveStorage(URL_STORE_KEY, [{ ...urls, ...data }])
   }
 
   return {

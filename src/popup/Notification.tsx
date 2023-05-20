@@ -1,6 +1,9 @@
 import { windows } from 'webextension-polyfill'
 
 import { sleep } from '~/utils'
+import { saveStorage } from '~/utils/storage'
+
+import { URL_STORE_KEY } from './constants/storage-key'
 
 export const NotificationPage = ({
   connectHandler,
@@ -33,6 +36,22 @@ export const NotificationPage = ({
       })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const [storeLoading, setStoreLoading] = useState(false)
+  const saveHandler = useCallback(async () => {
+    if (queries.get('turnUrl') && queries.get('nodeUrl')) {
+      setStoreLoading(true)
+      await saveStorage(URL_STORE_KEY, [
+        {
+          turnUrl: queries.get('turnUrl'),
+          nodeUrl: queries.get('nodeUrl'),
+        },
+      ])
+      setStoreLoading(false)
+      const { id } = await windows.getCurrent()
+      id && (await windows.remove(id))
+    }
+  }, [queries])
 
   return queries.get('pageType') === 'connect' ? (
     <div className="flex flex-col items-center pt-20 antialiased">
@@ -76,7 +95,11 @@ export const NotificationPage = ({
       </div>
 
       <div className="p-2.5 flex justify-end border-solid border-t border-gray-300">
-        <button className="relative px-2.5 py-1.5 border-angle fake-border hover:bg-stone/5 active:bg-stone/10 text-xs font-light">
+        <button
+          className="relative flex-center w-30 px-2.5 py-1.5 border-angle fake-border hover:bg-stone/5 active:bg-stone/10 text-xs font-light"
+          onClick={saveHandler}
+        >
+          {storeLoading && <span className="w-4 h-4 i-eos-icons:loading text-red-400"></span>}
           Confirm
         </button>
       </div>
