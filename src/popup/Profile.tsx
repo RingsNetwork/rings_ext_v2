@@ -1,100 +1,37 @@
 import { shorten } from '@did-network/dapp-sdk'
 import { useAccount, useConnect, useDisconnect, useNetwork } from 'wagmi'
-import { signMessage } from 'wagmi/actions'
-import { onMessage, sendMessage } from 'webext-bridge/popup'
-
-import { getStorage } from '~/utils/storage'
+import { sendMessage } from 'webext-bridge/popup'
 
 import type { Peer } from '../background/utils'
 import { NetworkSwitcher } from './components/SwitchNetworks'
-import { NotificationPage } from './Notification'
-import { useServerUrls } from './store'
 
-export function Popup() {
+export const Profile = ({
+  urls,
+  setUrls,
+  clients,
+  connectHandler,
+  loading,
+  destroyClient,
+}: {
+  urls: {
+    turnUrl: string
+    nodeUrl: string
+  }
+  setUrls: ({ turnUrl, nodeUrl }: { turnUrl?: string | undefined; nodeUrl?: string | undefined }) => Promise<void>
+  clients: any[]
+  connectHandler: () => Promise<void>
+  loading: boolean
+  destroyClient: () => Promise<void>
+}) => {
+  const { connect, connectors, isLoading, pendingConnector } = useConnect()
   const { address, isConnected } = useAccount()
   const { chain } = useNetwork()
-  const { connect, connectors, isLoading, pendingConnector, connectAsync } = useConnect()
   const { disconnect } = useDisconnect()
 
   const [show, setShow] = useState(false)
-  const [clients, setClients] = useState<any[]>([])
+  const contentRef = useRef<HTMLDivElement | null>(null)
 
-  useEffect(() => {
-    ;(async () => {
-      const data = await sendMessage('check-status', null)
-      console.log(data.clients)
-      setClients(data.clients)
-    })()
-
-    onMessage('sign-message', async ({ data }) => {
-      const signed = await signMessage({
-        message: data.auth,
-      })
-
-      return {
-        signed,
-      }
-    })
-  }, [])
-
-  const [loading, setLoading] = useState(false)
-
-  const { urls, setUrls } = useServerUrls()
-  useEffect(() => {
-    ;(async () => {
-      const data = await getStorage('serverUrls')
-      console.log(data[0])
-      if (data && data[0]) {
-        setUrls(data[0])
-      }
-    })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const createClient = useCallback(async () => {
-    if (loading) return
-    try {
-      let address_ = address
-      setLoading(true)
-      if (!address) {
-        const data = await connectAsync({ connector: connectors[0] })
-        address_ = data.account
-      }
-      if (address_) {
-        let _urls = {}
-        if (!urls.nodeUrl) {
-          _urls = (await getStorage('serverUrls'))[0]
-        }
-
-        const data = await sendMessage('init-background', {
-          account: address_,
-          ...urls,
-          ..._urls,
-        })
-
-        setClients(data.clients)
-      }
-    } catch (error) {
-      console.error(error)
-      throw Error(JSON.stringify(error))
-    } finally {
-      setLoading(false)
-    }
-  }, [address, connectAsync, connectors, loading, urls])
-
-  const destroyClient = useCallback(async () => {
-    sendMessage('destroy-client', null)
-
-    setShow(false)
-    const data = await sendMessage('check-status', null)
-    setClients(data.clients)
-  }, [])
-
-  const connectHandler = useCallback(async () => {
-    if (!clients.length) {
-      await createClient()
-    }
-  }, [clients, createClient])
+  const [switcherShow, setSwitcherShow] = useState(false)
 
   const [peers, setPeers] = useState<Peer[]>([])
   const [serviceNodes, setServiceNodes] = useState<string[]>([])
@@ -116,13 +53,7 @@ export function Popup() {
     }
   }, [getPeers])
 
-  const contentRef = useRef<HTMLDivElement | null>(null)
-
-  const [switcherShow, setSwitcherShow] = useState(false)
-
-  return new URLSearchParams(location.search).get('notification') ? (
-    <NotificationPage connectHandler={connectHandler} loading={loading} />
-  ) : (
+  return (
     <div className="w-358px h-400px flex-col-center font-pixel antialiased">
       <div className="w-full h-full">
         <div className="relative p-2.5 flex justify-between items-center border-solid border-b border-gray-300">
@@ -215,9 +146,10 @@ export function Popup() {
             </span>
             <span
               className="flex-1 text-right scale-80 origin-right cursor-pointer transition-all hover:translate-x-.25 underline underline-current"
-              onClick={() => {
+              onClick={async () => {
                 if (clients.length > 0) {
-                  destroyClient()
+                  await destroyClient()
+                  setShow(false)
                 }
               }}
             >

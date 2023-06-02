@@ -7,7 +7,7 @@ import { publicProvider } from 'wagmi/providers/public'
 
 import { metamaskProvider } from '~/provider'
 
-import { Popup } from './Popup'
+import { App } from './App'
 
 import '@unocss/reset/tailwind.css'
 import 'uno.css'
@@ -39,7 +39,7 @@ ready(() => {
 
   root.render(
     <WagmiConfig config={config}>
-      <Popup />
+      <App />
     </WagmiConfig>
   )
 })
