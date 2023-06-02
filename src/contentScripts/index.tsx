@@ -81,6 +81,7 @@ const setupPageStream = () => {
   // const $root = createRoot(root)
   // $root.render(<App />)
   shadowDOM.removeChild(scriptEl)
+  document.body.removeChild(container)
 })()
 
 export default {}
