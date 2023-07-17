@@ -1,3 +1,12 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://static.ringsnetwork.io/ringsnetwork_logo.png">
+  <img alt="Rings Network" src="https://raw.githubusercontent.com/RingsNetwork/asserts/main/logo/rings_network_red.png">
+</picture>
+
+Rings Extension (This extension is under development)
+===============
+
+
 # ext-v2
 
 - **Nodejs** >= v16.13.0
@@ -46,3 +55,17 @@ pnpm build
 ```
 
 And then pack files under `extension`, you can upload `extension.crx` or `extension.xpi` to appropriate extension store.
+
+### Load || Install
+
+To load the extension from source:
+
+* Chrome:
+
+https://developer.chrome.com/docs/extensions/mv3/getstarted/development-basics/#load-unpacked
+
+* Firefox
+
+In Firefox: Open the about:debugging page, click the This Firefox option, click the Load Temporary Add-on button, then select any file in your extension's directory.
+
+ref: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Your_first_WebExtension
