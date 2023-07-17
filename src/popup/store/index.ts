@@ -4,15 +4,17 @@ import { saveStorage } from '~/utils/storage'
 
 import { URL_STORE_KEY } from '../constants/storage-key'
 
+// try load rings config from ENV
 const _urls = atom({
-  turnUrl: '',
-  nodeUrl: '',
+  turnUrl: import.meta.env.RINGS_ICE_URL || '',
+  nodeUrl: import.meta.env.RINGS_PUBLIC_NODE_SEED_URL || '',
 })
 
 const inUndef = (value: any) => typeof value === 'undefined'
 
 export const useServerUrls = () => {
   const [urls, _setUrls] = useAtom(_urls)
+  chrome.extension.getBackgroundPage().console.log(_urls)
 
   const setUrls = async ({ turnUrl, nodeUrl }: { turnUrl?: string; nodeUrl?: string }) => {
     const data = {
