@@ -14,7 +14,6 @@ const inUndef = (value: any) => typeof value === 'undefined'
 
 export const useServerUrls = () => {
   const [urls, _setUrls] = useAtom(_urls)
-  chrome.extension.getBackgroundPage().console.log(_urls)
 
   const setUrls = async ({ turnUrl, nodeUrl }: { turnUrl?: string; nodeUrl?: string }) => {
     const data = {
