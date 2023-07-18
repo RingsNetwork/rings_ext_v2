@@ -4,9 +4,10 @@ import { saveStorage } from '~/utils/storage'
 
 import { URL_STORE_KEY } from '../constants/storage-key'
 
+// try load rings config from ENV
 const _urls = atom({
-  turnUrl: '',
-  nodeUrl: '',
+  turnUrl: import.meta.env.RINGS_ICE_URL || '',
+  nodeUrl: import.meta.env.RINGS_PUBLIC_NODE_SEED_URL || '',
 })
 
 const inUndef = (value: any) => typeof value === 'undefined'

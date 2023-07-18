@@ -13,6 +13,9 @@ import { isDev, port, r } from './scripts/utils'
 
 export const sharedConfig: UserConfig = {
   root: r('src'),
+  // Default: root
+  envDir: '../',
+  envPrefix: 'RINGS',
   resolve: {
     alias: {
       '~/': `${r('src')}/`,
