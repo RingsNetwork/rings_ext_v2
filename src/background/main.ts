@@ -66,6 +66,56 @@ const requestHandlerMap: Record<string, any> = {
   getServiceNodes,
 }
 
+// create callback for handle custom message
+const callback = new MessageCallbackInstance(
+  // custom message
+  async (response: any, message: any) => {
+    console.group('on custom message')
+    const { relay } = response
+    console.log(`relay`, relay)
+    console.log(`destination`, relay.destination)
+    console.log(message)
+    console.log(new TextDecoder().decode(message))
+    const to = relay.destination.replace(/^0x/, '')
+    const from = relay.path[0].replace(/^0x/, '')
+    console.log(`from`, from)
+    console.log(`to`, to)
+    console.groupEnd()
+
+    receiveMessage({
+      peer: from,
+      message: {
+        from,
+        to,
+        // message: new TextDecoder().decode(message),
+      },
+    })
+  },
+  // http response message
+  async (response: any, message: any) => {
+    const { tx_id } = response
+    if (messageStatusMap.get(tx_id) === 'pending' && message) {
+      const { body, headers, ...rest }: { body: any; headers: Map<string, string> } = message
+      const parsedHeaders: { [key: string]: string } = {}
+
+      for (const [key, value] of headers.entries()) {
+        parsedHeaders[key] = value
+      }
+
+      const parsedBody = new TextDecoder().decode(new Uint8Array(body))
+
+      console.log(`parsed`, { ...rest, headers: parsedHeaders, body: parsedBody })
+
+      messageStatusMap.set(
+        tx_id,
+        JSON.stringify({ ...rest, headers: parsedHeaders, body: parsedBody, rawBody: body })
+      )
+    }
+  },
+  async (relay: any, prev: String) => { }
+)
+
+
 onMessage('check-status', async () => {
   return {
     clients,
@@ -308,82 +358,34 @@ async function createRingsNodeClient({
   account: string
   nodeUrl: string
 }) {
-  if (currentClient && currentAccount === account) {
-    return
-  }
-  // init wasm
-  if (!wasmInit) {
-    try {
-      wasmInit = await init(browser.runtime.getURL('dist/background/rings_node_bg.wasm'))
-      initSuccess()
-    } catch (error) {
-      initFailed()
-    }
-  }
-  // create callback for handle custom message
-  const callback = new MessageCallbackInstance(
-    // custom message
-    async (response: any, message: any) => {
-      console.group('on custom message')
-      const { relay } = response
-      console.log(`relay`, relay)
-      console.log(`destination`, relay.destination)
-      console.log(message)
-      console.log(new TextDecoder().decode(message))
-      const to = relay.destination.replace(/^0x/, '')
-      const from = relay.path[0].replace(/^0x/, '')
-      console.log(`from`, from)
-      console.log(`to`, to)
-      console.groupEnd()
-
-      receiveMessage({
-        peer: from,
-        message: {
-          from,
-          to,
-          // message: new TextDecoder().decode(message),
-        },
-      })
-    },
-    // http response message
-    async (response: any, message: any) => {
-      const { tx_id } = response
-      if (messageStatusMap.get(tx_id) === 'pending' && message) {
-        const { body, headers, ...rest }: { body: any; headers: Map<string, string> } = message
-        const parsedHeaders: { [key: string]: string } = {}
-
-        for (const [key, value] of headers.entries()) {
-          parsedHeaders[key] = value
-        }
-
-        const parsedBody = new TextDecoder().decode(new Uint8Array(body))
-
-        console.log(`parsed`, { ...rest, headers: parsedHeaders, body: parsedBody })
-
-        messageStatusMap.set(
-          tx_id,
-          JSON.stringify({ ...rest, headers: parsedHeaders, body: parsedBody, rawBody: body })
-        )
-      }
-    },
-    async (relay: any, prev: String) => { }
-  )
-
-  // prepare auth & send to metamask for sign
-  let delegateeBuilder = DelegateeSkBuilder.new(account, 'eip191')
-  let unsignedDelegation = delegateeBuilder.unsigned_delegation()
-  const { signed } = await sendMessage(
-    'sign-message',
-    {
-      auth: unsignedDelegation,
-    },
-    'popup'
-  )
-  const signature = new Uint8Array(hexToBytes(signed))
-  delegateeBuilder = delegateeBuilder.set_delegation_sig(signature)
-  console.log('set sig', delegateeBuilder)
-
   try {
+    if (currentClient && currentAccount === account) {
+      return
+    }
+    // init wasm
+    if (!wasmInit) {
+      try {
+        wasmInit = await init(browser.runtime.getURL('dist/background/rings_node_bg.wasm'))
+        initSuccess()
+      } catch (error) {
+        initFailed()
+      }
+    }
+
+    // prepare auth & send to metamask for sign
+    let delegateeBuilder = DelegateeSkBuilder.new(account, 'eip191')
+    let unsignedDelegation = delegateeBuilder.unsigned_delegation()
+    const { signed } = await sendMessage(
+      'sign-message',
+      {
+        auth: unsignedDelegation,
+      },
+      'popup'
+    )
+    const signature = new Uint8Array(hexToBytes(signed))
+    delegateeBuilder = delegateeBuilder.set_delegation_sig(signature)
+    console.log('set sig', delegateeBuilder)
+
     let delegateeSk: DelegateeSk = delegateeBuilder.build()
     console.log('done build')
     let config = ProcessorConfig.new(turnUrl, delegateeSk, 100)
@@ -397,6 +399,6 @@ async function createRingsNodeClient({
     return client_
 
   } catch (e) {
-    console.log(e)
+    console.error(e)
   }
 }
