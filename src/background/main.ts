@@ -1,4 +1,10 @@
-import init, { Client, MessageCallbackInstance, UnsignedInfo } from '@ringsnetwork/rings-node'
+import init, {
+  Client,
+  DelegateeSk,
+  DelegateeSkBuilder,
+  MessageCallbackInstance,
+  ProcessorConfig,
+} from '@ringsnetwork/rings-node'
 import { onMessage, sendMessage } from 'webext-bridge/background'
 import browser from 'webextension-polyfill'
 
@@ -109,55 +115,8 @@ onMessage('init-background', async ({ data }) => {
     }
   }
   const client_ = await createRingsNodeClient(data)
-  const callback = new MessageCallbackInstance(
-    // custom message
-    async (response: any, message: any) => {
-      console.group('on custom message')
-      const { relay } = response
-      console.log(`relay`, relay)
-      console.log(`destination`, relay.destination)
-      console.log(message)
-      console.log(new TextDecoder().decode(message))
-      const to = relay.destination.replace(/^0x/, '')
-      const from = relay.path[0].replace(/^0x/, '')
-      console.log(`from`, from)
-      console.log(`to`, to)
-      console.groupEnd()
 
-      receiveMessage({
-        peer: from,
-        message: {
-          from,
-          to,
-          // message: new TextDecoder().decode(message),
-        },
-      })
-    },
-    // http response message
-    async (response: any, message: any) => {
-      const { tx_id } = response
-      if (messageStatusMap.get(tx_id) === 'pending' && message) {
-        const { body, headers, ...rest }: { body: any; headers: Map<string, string> } = message
-        const parsedHeaders: { [key: string]: string } = {}
-
-        for (const [key, value] of headers.entries()) {
-          parsedHeaders[key] = value
-        }
-
-        const parsedBody = new TextDecoder().decode(new Uint8Array(body))
-
-        console.log(`parsed`, { ...rest, headers: parsedHeaders, body: parsedBody })
-
-        messageStatusMap.set(
-          tx_id,
-          JSON.stringify({ ...rest, headers: parsedHeaders, body: parsedBody, rawBody: body })
-        )
-      }
-    },
-    async (relay: any, prev: String) => {}
-  )
-
-  await client_?.listen(callback)
+  await client_?.listen()
 
   const promises = data.nodeUrl.split(';').map(async (url: string) => await client_?.connect_peer_via_http(url))
   await Promise.any(promises)
@@ -361,32 +320,83 @@ async function createRingsNodeClient({
       initFailed()
     }
   }
+  // create callback for handle custom message
+  const callback = new MessageCallbackInstance(
+    // custom message
+    async (response: any, message: any) => {
+      console.group('on custom message')
+      const { relay } = response
+      console.log(`relay`, relay)
+      console.log(`destination`, relay.destination)
+      console.log(message)
+      console.log(new TextDecoder().decode(message))
+      const to = relay.destination.replace(/^0x/, '')
+      const from = relay.path[0].replace(/^0x/, '')
+      console.log(`from`, from)
+      console.log(`to`, to)
+      console.groupEnd()
+
+      receiveMessage({
+        peer: from,
+        message: {
+          from,
+          to,
+          // message: new TextDecoder().decode(message),
+        },
+      })
+    },
+    // http response message
+    async (response: any, message: any) => {
+      const { tx_id } = response
+      if (messageStatusMap.get(tx_id) === 'pending' && message) {
+        const { body, headers, ...rest }: { body: any; headers: Map<string, string> } = message
+        const parsedHeaders: { [key: string]: string } = {}
+
+        for (const [key, value] of headers.entries()) {
+          parsedHeaders[key] = value
+        }
+
+        const parsedBody = new TextDecoder().decode(new Uint8Array(body))
+
+        console.log(`parsed`, { ...rest, headers: parsedHeaders, body: parsedBody })
+
+        messageStatusMap.set(
+          tx_id,
+          JSON.stringify({ ...rest, headers: parsedHeaders, body: parsedBody, rawBody: body })
+        )
+      }
+    },
+    async (relay: any, prev: String) => { }
+  )
 
   // prepare auth & send to metamask for sign
-  const unsignedInfo = new UnsignedInfo(account)
+  let delegateeBuilder = DelegateeSkBuilder.new(account, 'eip191')
+  let unsignedDelegation = delegateeBuilder.unsigned_delegation()
   const { signed } = await sendMessage(
     'sign-message',
     {
-      auth: unsignedInfo.auth,
+      auth: unsignedDelegation,
     },
     'popup'
   )
   const signature = new Uint8Array(hexToBytes(signed))
+  delegateeBuilder = delegateeBuilder.set_delegation_sig(signature)
+  console.log('set sig', delegateeBuilder)
 
-  console.log({
-    account,
-    turnUrl,
-    nodeUrl,
-    signed,
-    auth: unsignedInfo.auth,
-    signature,
-  })
+  try {
+    let delegateeSk: DelegateeSk = delegateeBuilder.build()
+    console.log('done build')
+    let config = ProcessorConfig.new(turnUrl, delegateeSk, 100)
 
-  connecting()
+    connecting()
 
-  let client_: Client = await Client.new_client(unsignedInfo, signature, turnUrl)
-  currentAccount = account
-  currentClient = client_
-  clients.push(client_)
-  return client_
+    let client_: Client = await Client.new_client_with_config(config, callback)
+    currentAccount = account
+    currentClient = client_
+    clients.push(client_)
+    return client_
+
+  } catch (e) {
+    console.log(e)
+  }
 }

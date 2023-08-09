@@ -56,7 +56,7 @@
     "@metamask/post-message-stream": "^6.1.1",
     "@metamask/providers": "^10.2.1",
     "@ringsnetwork/bns-util": "^0.9.1",
-    "@ringsnetwork/rings-node": "0.2.5-dev-20230516.0",
+    "@ringsnetwork/rings-node": "git+file:///Users/ryan/Dev/bns/rings-node",
     "@unocss/reset": "^0.50.6",
     "buffer": "^6.0.3",
     "document-ready": "^2.0.2",
