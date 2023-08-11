@@ -1,7 +1,7 @@
 import init, {
   Client,
-  DelegateeSk,
-  DelegateeSkBuilder,
+  SessionSk,
+  SessionSkBuilder,
   MessageCallbackInstance,
   ProcessorConfig,
 } from '@ringsnetwork/rings-node'
@@ -373,22 +373,19 @@ async function createRingsNodeClient({
     }
 
     // prepare auth & send to metamask for sign
-    let delegateeBuilder = DelegateeSkBuilder.new(account, 'eip191')
-    let unsignedDelegation = delegateeBuilder.unsigned_delegation()
+    let sessionBuilder = SessionSkBuilder.new(account, 'eip191')
+    let proof = sessionBuilder.unsigned_proof()
     const { signed } = await sendMessage(
       'sign-message',
       {
-        auth: unsignedDelegation,
+        auth: proof,
       },
       'popup'
     )
     const signature = new Uint8Array(hexToBytes(signed))
-    delegateeBuilder = delegateeBuilder.set_delegation_sig(signature)
-    console.log('set sig', delegateeBuilder)
-
-    let delegateeSk: DelegateeSk = delegateeBuilder.build()
-    console.log('done build')
-    let config = ProcessorConfig.new(turnUrl, delegateeSk, 100)
+    sessionBuilder = sessionBuilder.set_session_sig(signature)
+    let sessionSk: SessionSk = sessionBuilder.build()
+    let config = ProcessorConfig.new(turnUrl, sessionSk, 100)
 
     connecting()
 
