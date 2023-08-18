@@ -6,7 +6,7 @@
 Rings Extension (This extension is under development)
 ===============
 
-![qaci](https://github.com/github/docs/actions/workflows/dev.yml/badge.svg)
+[![rings-ext-v2](https://github.com/RingsNetwork/rings_ext_v2/actions/workflows/dev.yml/badge.svg)](https://github.com/github/RingsNetwork/rings_ext_v2/workflows/dev.yml)
 
 
 # TL;DR
