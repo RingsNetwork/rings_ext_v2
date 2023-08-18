@@ -21,7 +21,7 @@ dependencies:
     specifier: ^0.9.1
     version: 0.9.1(@babel/core@7.21.8)(@nomiclabs/hardhat-web3@2.0.0)(hardhat@2.14.0)(typescript@4.9.5)(web3-core-helpers@1.10.0)(web3-core-promievent@1.10.0)(web3-eth-abi@1.10.0)(web3-utils@1.10.0)(web3@1.10.0)
   '@ringsnetwork/rings-node':
-    specifier: git://github.com/RingsNetwork/rings-node#v0.2.7
+    specifier: https://github.com/RingsNetwork/rings-node.git#v0.2.7
     version: github.com/RingsNetwork/rings-node/85163b83ca0e181e1e68590c3e994c2146d86a26
   '@unocss/reset':
     specifier: ^0.50.6

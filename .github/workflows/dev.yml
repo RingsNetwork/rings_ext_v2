@@ -27,10 +27,9 @@ jobs:
         with:
           version: 8.2.0
 
-      - name: Reconfigure git to use HTTP authentication
+      - name: Gen temporary rsa key
         run: >
-          git config --global url."https://github.com/".insteadOf
-          ssh://git@github.com/
+          ssh-keygen -t rsa -C "ci@ringsnetwork.io" -f tempKey -N ""
 
       - name: Get target
         id: target
