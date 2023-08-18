@@ -6,12 +6,16 @@
 Rings Extension (This extension is under development)
 ===============
 
-![Screenshot of sign](./screenshots/sign.png)
-![Screenshot of webrtc](./screenshots/webrtc.png)
 
 # TL;DR
 
 This is a implementation of Rings Extension, which support login rings network with metamask and other wallets.
+
+
+# Screenshots
+
+![Screenshot of sign](./screenshots/sign.png)
+![Screenshot of webrtc](./screenshots/webrtc.png)
 
 
 ## Requirement
