@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 overrides:
   ethereumjs-abi: https://codeload.github.com/ethereumjs/ethereumjs-abi/tar.gz/ee3994657fa7a427238e6ba92a84d0b529bbcde0
 
@@ -17,8 +21,8 @@ dependencies:
     specifier: ^0.9.1
     version: 0.9.1(@babel/core@7.21.8)(@nomiclabs/hardhat-web3@2.0.0)(hardhat@2.14.0)(typescript@4.9.5)(web3-core-helpers@1.10.0)(web3-core-promievent@1.10.0)(web3-eth-abi@1.10.0)(web3-utils@1.10.0)(web3@1.10.0)
   '@ringsnetwork/rings-node':
-    specifier: 0.2.5-dev-20230516.0
-    version: 0.2.5-dev-20230516.0
+    specifier: https://github.com/RingsNetwork/rings-node/releases/download/v0.2.7/rings-v0.2.7-wasm32-unknown-unknown.tgz
+    version: '@github.com/RingsNetwork/rings-node/releases/download/v0.2.7/rings-v0.2.7-wasm32-unknown-unknown.tgz'
   '@unocss/reset':
     specifier: ^0.50.6
     version: 0.50.6
@@ -3145,10 +3149,6 @@ packages:
       - web3-core-promievent
       - web3-eth-abi
       - web3-utils
-    dev: false
-
-  /@ringsnetwork/rings-node@0.2.5-dev-20230516.0:
-    resolution: {integrity: sha512-p1cPKYXzl3h7n+0FqaULBY+WZoIUDnqJwqnWLOM/JjZBOpfWbsQblZU7+aQVUlh/C/OLgTGdraoxj7w6+RRkKg==}
     dev: false
 
   /@rollup/plugin-inject@5.0.3:
@@ -12661,7 +12661,7 @@ packages:
     optional: true
 
   /oboe@2.1.5:
-    resolution: {integrity: sha1-VVQoTFQ6ImbXo48X4HOCH73jk80=}
+    resolution: {integrity: sha512-zRFWiF+FoicxEs3jNI/WYUrVEgA7DeET/InK0XQuudGHRg8iIob3cNPrJTKaz4004uaA9Pbe+Dwa8iluhjLZWA==}
     dependencies:
       http-https: 1.0.0
     dev: false
@@ -17665,4 +17665,10 @@ packages:
     dependencies:
       bn.js: 4.12.0
       ethereumjs-util: 6.2.1
+    dev: false
+
+  '@github.com/RingsNetwork/rings-node/releases/download/v0.2.7/rings-v0.2.7-wasm32-unknown-unknown.tgz':
+    resolution: {tarball: https://github.com/RingsNetwork/rings-node/releases/download/v0.2.7/rings-v0.2.7-wasm32-unknown-unknown.tgz}
+    name: '@ringsnetwork/rings-node'
+    version: 0.2.6
     dev: false

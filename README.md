@@ -6,8 +6,21 @@
 Rings Extension (This extension is under development)
 ===============
 
+[![rings-ext-v2](https://github.com/RingsNetwork/rings_ext_v2/actions/workflows/dev.yml/badge.svg)](https://github.com/RingsNetwork/rings_ext_v2/actions/workflows/dev.yml)
 
-# ext-v2
+
+# TL;DR
+
+This is a implementation of Rings Extension, which support login rings network with metamask and other wallets.
+
+
+# Screenshots
+
+![Screenshot of sign](./screenshots/sign.png)
+![Screenshot of webrtc](./screenshots/webrtc.png)
+
+
+## Requirement
 
 - **Nodejs** >= v16.13.0
 - **pnpm** >= v8
