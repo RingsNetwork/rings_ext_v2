@@ -27,10 +27,6 @@ jobs:
         with:
           version: 8.2.0
 
-      - name: Gen temporary rsa key
-        run: >
-          ssh-keygen -t rsa -C "ci@ringsnetwork.io" -f tempKey -N ""
-
       - name: Get target
         id: target
         run: echo 'target=${{ matrix.arch }}-unknown-${{ matrix.platform }}' >> $GITHUB_OUTPUT
