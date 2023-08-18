@@ -2,17 +2,56 @@ name: Develop
 
 on:
   push:
-    branches: [ main ]
-
+    branches:
+      - master
+      - main
+  pull_request:
+    branches:
+      - master
+      - develop
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch:
+          - wasm32
+        platform:
+          - unknown
+
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2.2.2
         with:
           version: 8.2.0
+
+      - name: Get target
+        id: target
+        run: echo 'target=${{ matrix.arch }}-unknown-${{ matrix.platform }}' >> $GITHUB_OUTPUT
+
+      - name: Add target
+        run: |
+          rustup target add ${{ steps.target.outputs.target }}
+
+      - uses: jetli/wasm-bindgen-action@v0.2.0
+        with:
+          version: "0.2.84"
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Setup rust toolchain
+        run: |
+          rustup show
+
+      # If you need to reset the cache version, increment the number after `v`
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: auto-release-${{ steps.target.outputs.target }}-v1
+
+
       - name: Install Node.js
         uses: actions/setup-node@v2
         with:

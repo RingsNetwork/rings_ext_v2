@@ -98,7 +98,7 @@ export const Profile = ({
 
         <div className="relative p-2.5">
           <div className="flex justify-between items-center">
-            <span className="w-80px text-xs scale-90 origin-left">TurnUrl:</span>
+            <span className="w-100px text-xs scale-90 origin-left">ICE URL:</span>
             <input
               className="h-7 px-1 flex-1 fake-border outline-none scale-90 origin-right disabled:opacity-60"
               value={urls.turnUrl}
@@ -110,8 +110,11 @@ export const Profile = ({
               disabled={clients.length > 0}
             />
           </div>
+          <div className="bg-gray-100 text-xs px-1 py-1 leading-3 text-slate-600">
+            ICE Url is a URL list for ICE protocol, this can be TURN or STUN URL
+          </div>
           <div className="mt-2.5 flex justify-between items-center">
-            <span className="w-80px text-xs scale-90 origin-left">NodeUrl:</span>
+            <span className="w-100px text-xs scale-90 origin-left">SEEDS URL:</span>
             <input
               className="h-7 px-1 flex-1 fake-border outline-none scale-90 origin-right disabled:opacity-60"
               value={urls.nodeUrl}
@@ -122,6 +125,9 @@ export const Profile = ({
               }}
               disabled={clients.length > 0}
             />
+          </div>
+          <div className="bg-gray-100 text-xs px-1 py-1 leading-3 text-slate-600">
+            Seeds url is a URL list, which are working as entrypoint of rings network
           </div>
         </div>
       </div>
