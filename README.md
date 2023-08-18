@@ -6,6 +6,8 @@
 Rings Extension (This extension is under development)
 ===============
 
+![qaci](https://github.com/github/docs/actions/workflows/dev.yml/badge.svg)
+
 
 # TL;DR
 
