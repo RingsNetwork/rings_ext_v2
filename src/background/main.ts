@@ -1,10 +1,8 @@
 import init, {
   Client,
-  SessionSk,
-  SessionSkBuilder,
   MessageCallbackInstance,
-  ProcessorConfig,
 } from '@ringsnetwork/rings-node'
+
 import { onMessage, sendMessage } from 'webext-bridge/background'
 import browser from 'webextension-polyfill'
 
@@ -67,53 +65,55 @@ const requestHandlerMap: Record<string, any> = {
 }
 
 // create callback for handle custom message
-const callback = new MessageCallbackInstance(
-  // custom message
-  async (response: any, message: any) => {
-    console.group('on custom message')
-    const { relay } = response
-    console.log(`relay`, relay)
-    console.log(`destination`, relay.destination)
-    console.log(message)
-    console.log(new TextDecoder().decode(message))
-    const to = relay.destination.replace(/^0x/, '')
-    const from = relay.path[0].replace(/^0x/, '')
-    console.log(`from`, from)
-    console.log(`to`, to)
-    console.groupEnd()
+const gen_callback = (): MessageCallbackInstance => {
+  return new MessageCallbackInstance(
+    // custom message
+    async (response: any, message: any) => {
+      console.group('on custom message')
+      const { relay } = response
+      console.log(`relay`, relay)
+      console.log(`destination`, relay.destination)
+      console.log(message)
+      console.log(new TextDecoder().decode(message))
+      const to = relay.destination.replace(/^0x/, '')
+      const from = relay.path[0].replace(/^0x/, '')
+      console.log(`from`, from)
+      console.log(`to`, to)
+      console.groupEnd()
 
-    receiveMessage({
-      peer: from,
-      message: {
-        from,
-        to,
-        // message: new TextDecoder().decode(message),
-      },
-    })
-  },
-  // http response message
-  async (response: any, message: any) => {
-    const { tx_id } = response
-    if (messageStatusMap.get(tx_id) === 'pending' && message) {
-      const { body, headers, ...rest }: { body: any; headers: Map<string, string> } = message
-      const parsedHeaders: { [key: string]: string } = {}
+      receiveMessage({
+        peer: from,
+        message: {
+          from,
+          to,
+          // message: new TextDecoder().decode(message),
+        },
+      })
+    },
+    // http response message
+    async (response: any, message: any) => {
+      const { tx_id } = response
+      if (messageStatusMap.get(tx_id) === 'pending' && message) {
+        const { body, headers, ...rest }: { body: any; headers: Map<string, string> } = message
+        const parsedHeaders: { [key: string]: string } = {}
 
-      for (const [key, value] of headers.entries()) {
-        parsedHeaders[key] = value
+        for (const [key, value] of headers.entries()) {
+          parsedHeaders[key] = value
+        }
+
+        const parsedBody = new TextDecoder().decode(new Uint8Array(body))
+
+        console.log(`parsed`, { ...rest, headers: parsedHeaders, body: parsedBody })
+
+        messageStatusMap.set(
+          tx_id,
+          JSON.stringify({ ...rest, headers: parsedHeaders, body: parsedBody, rawBody: body })
+        )
       }
-
-      const parsedBody = new TextDecoder().decode(new Uint8Array(body))
-
-      console.log(`parsed`, { ...rest, headers: parsedHeaders, body: parsedBody })
-
-      messageStatusMap.set(
-        tx_id,
-        JSON.stringify({ ...rest, headers: parsedHeaders, body: parsedBody, rawBody: body })
-      )
-    }
-  },
-  async (relay: any, prev: String) => { }
-)
+    },
+    async (relay: any, prev: String) => { }
+  )
+}
 
 
 onMessage('check-status', async () => {
@@ -372,24 +372,33 @@ async function createRingsNodeClient({
       }
     }
 
-    // prepare auth & send to metamask for sign
-    let sessionBuilder = SessionSkBuilder.new(account, 'eip191')
-    let proof = sessionBuilder.unsigned_proof()
-    const { signed } = await sendMessage(
-      'sign-message',
-      {
-        auth: proof,
-      },
-      'popup'
-    )
-    const signature = new Uint8Array(hexToBytes(signed))
-    sessionBuilder = sessionBuilder.set_session_sig(signature)
-    let sessionSk: SessionSk = sessionBuilder.build()
-    let config = ProcessorConfig.new(turnUrl, sessionSk, 100)
-
     connecting()
 
-    let client_: Client = await Client.new_client_with_config(config, callback)
+    let signer = async (proof: string): Promise<Uint8Array> => {
+      const { signed } = await sendMessage(
+        'sign-message',
+        {
+          auth: proof,
+        },
+        'popup'
+      )
+      return new Uint8Array(hexToBytes(signed));
+    }
+    let callback = gen_callback()
+    let client_: Client = await new Client(
+      // ice_servers
+      turnUrl,
+      // stable_tineout
+      100,
+      // account
+      account,
+      // account type
+      "eip191",
+      // signer
+      signer,
+      // callback
+      callback
+    )
     currentAccount = account
     currentClient = client_
     clients.push(client_)
