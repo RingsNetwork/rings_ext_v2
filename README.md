@@ -11,7 +11,6 @@ Rings Extension (This extension is under development)
 
 - **Nodejs** >= v16.13.0
 - **pnpm** >= v8
-![image](https://github.com/RingsNetwork/ext_v2/assets/21095710/ffc59941-0cb7-48f5-bda7-2a09201bf616)
 
 ## Usage
 

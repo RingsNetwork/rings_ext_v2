@@ -1,4 +1,8 @@
-import init, { Client, MessageCallbackInstance, UnsignedInfo } from '@ringsnetwork/rings-node'
+import init, {
+  Client,
+  MessageCallbackInstance,
+} from '@ringsnetwork/rings-node'
+
 import { onMessage, sendMessage } from 'webext-bridge/background'
 import browser from 'webextension-polyfill'
 
@@ -60,6 +64,58 @@ const requestHandlerMap: Record<string, any> = {
   getServiceNodes,
 }
 
+// create callback for handle custom message
+const gen_callback = (): MessageCallbackInstance => {
+  return new MessageCallbackInstance(
+    // custom message
+    async (response: any, message: any) => {
+      console.group('on custom message')
+      const { relay } = response
+      console.log(`relay`, relay)
+      console.log(`destination`, relay.destination)
+      console.log(message)
+      console.log(new TextDecoder().decode(message))
+      const to = relay.destination.replace(/^0x/, '')
+      const from = relay.path[0].replace(/^0x/, '')
+      console.log(`from`, from)
+      console.log(`to`, to)
+      console.groupEnd()
+
+      receiveMessage({
+        peer: from,
+        message: {
+          from,
+          to,
+          // message: new TextDecoder().decode(message),
+        },
+      })
+    },
+    // http response message
+    async (response: any, message: any) => {
+      const { tx_id } = response
+      if (messageStatusMap.get(tx_id) === 'pending' && message) {
+        const { body, headers, ...rest }: { body: any; headers: Map<string, string> } = message
+        const parsedHeaders: { [key: string]: string } = {}
+
+        for (const [key, value] of headers.entries()) {
+          parsedHeaders[key] = value
+        }
+
+        const parsedBody = new TextDecoder().decode(new Uint8Array(body))
+
+        console.log(`parsed`, { ...rest, headers: parsedHeaders, body: parsedBody })
+
+        messageStatusMap.set(
+          tx_id,
+          JSON.stringify({ ...rest, headers: parsedHeaders, body: parsedBody, rawBody: body })
+        )
+      }
+    },
+    async (relay: any, prev: String) => { }
+  )
+}
+
+
 onMessage('check-status', async () => {
   return {
     clients,
@@ -109,55 +165,8 @@ onMessage('init-background', async ({ data }) => {
     }
   }
   const client_ = await createRingsNodeClient(data)
-  const callback = new MessageCallbackInstance(
-    // custom message
-    async (response: any, message: any) => {
-      console.group('on custom message')
-      const { relay } = response
-      console.log(`relay`, relay)
-      console.log(`destination`, relay.destination)
-      console.log(message)
-      console.log(new TextDecoder().decode(message))
-      const to = relay.destination.replace(/^0x/, '')
-      const from = relay.path[0].replace(/^0x/, '')
-      console.log(`from`, from)
-      console.log(`to`, to)
-      console.groupEnd()
 
-      receiveMessage({
-        peer: from,
-        message: {
-          from,
-          to,
-          // message: new TextDecoder().decode(message),
-        },
-      })
-    },
-    // http response message
-    async (response: any, message: any) => {
-      const { tx_id } = response
-      if (messageStatusMap.get(tx_id) === 'pending' && message) {
-        const { body, headers, ...rest }: { body: any; headers: Map<string, string> } = message
-        const parsedHeaders: { [key: string]: string } = {}
-
-        for (const [key, value] of headers.entries()) {
-          parsedHeaders[key] = value
-        }
-
-        const parsedBody = new TextDecoder().decode(new Uint8Array(body))
-
-        console.log(`parsed`, { ...rest, headers: parsedHeaders, body: parsedBody })
-
-        messageStatusMap.set(
-          tx_id,
-          JSON.stringify({ ...rest, headers: parsedHeaders, body: parsedBody, rawBody: body })
-        )
-      }
-    },
-    async (relay: any, prev: String) => {}
-  )
-
-  await client_?.listen(callback)
+  await client_?.listen()
 
   const promises = data.nodeUrl.split(';').map(async (url: string) => await client_?.connect_peer_via_http(url))
   await Promise.any(promises)
@@ -349,44 +358,53 @@ async function createRingsNodeClient({
   account: string
   nodeUrl: string
 }) {
-  if (currentClient && currentAccount === account) {
-    return
-  }
-  // init wasm
-  if (!wasmInit) {
-    try {
-      wasmInit = await init(browser.runtime.getURL('dist/background/rings_node_bg.wasm'))
-      initSuccess()
-    } catch (error) {
-      initFailed()
+  try {
+    if (currentClient && currentAccount === account) {
+      return
     }
+    // init wasm
+    if (!wasmInit) {
+      try {
+        wasmInit = await init(browser.runtime.getURL('dist/background/rings_node_bg.wasm'))
+        initSuccess()
+      } catch (error) {
+        initFailed()
+      }
+    }
+
+    connecting()
+
+    let signer = async (proof: string): Promise<Uint8Array> => {
+      const { signed } = await sendMessage(
+        'sign-message',
+        {
+          auth: proof,
+        },
+        'popup'
+      )
+      return new Uint8Array(hexToBytes(signed));
+    }
+    let callback = gen_callback()
+    let client_: Client = await new Client(
+      // ice_servers
+      turnUrl,
+      // stable_tineout
+      100,
+      // account
+      account,
+      // account type
+      "eip191",
+      // signer
+      signer,
+      // callback
+      callback
+    )
+    currentAccount = account
+    currentClient = client_
+    clients.push(client_)
+    return client_
+
+  } catch (e) {
+    console.error(e)
   }
-
-  // prepare auth & send to metamask for sign
-  const unsignedInfo = new UnsignedInfo(account)
-  const { signed } = await sendMessage(
-    'sign-message',
-    {
-      auth: unsignedInfo.auth,
-    },
-    'popup'
-  )
-  const signature = new Uint8Array(hexToBytes(signed))
-
-  console.log({
-    account,
-    turnUrl,
-    nodeUrl,
-    signed,
-    auth: unsignedInfo.auth,
-    signature,
-  })
-
-  connecting()
-
-  let client_: Client = await Client.new_client(unsignedInfo, signature, turnUrl)
-  currentAccount = account
-  currentClient = client_
-  clients.push(client_)
-  return client_
 }
