@@ -27,6 +27,11 @@ jobs:
         with:
           version: 8.2.0
 
+      - name: Reconfigure git to use HTTP authentication
+        run: >
+          git config --global url."https://github.com/".insteadOf
+          ssh://git@github.com/
+
       - name: Get target
         id: target
         run: echo 'target=${{ matrix.arch }}-unknown-${{ matrix.platform }}' >> $GITHUB_OUTPUT
