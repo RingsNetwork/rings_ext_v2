@@ -56,7 +56,6 @@
     "@metamask/post-message-stream": "^6.1.1",
     "@metamask/providers": "^10.2.1",
     "@rings/webext-template": "link:",
-    "@ringsnetwork/bns-util": "^0.9.1",
     "@unocss/reset": "^0.50.6",
     "buffer": "^6.0.3",
     "document-ready": "^2.0.2",
