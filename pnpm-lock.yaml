@@ -17,12 +17,15 @@ dependencies:
   '@metamask/providers':
     specifier: ^10.2.1
     version: 10.2.1
+  '@rings/webext-template':
+    specifier: 'link:'
+    version: 'link:'
   '@ringsnetwork/bns-util':
     specifier: ^0.9.1
     version: 0.9.1(@babel/core@7.21.8)(@nomiclabs/hardhat-web3@2.0.0)(hardhat@2.14.0)(typescript@4.9.5)(web3-core-helpers@1.10.0)(web3-core-promievent@1.10.0)(web3-eth-abi@1.10.0)(web3-utils@1.10.0)(web3@1.10.0)
   '@ringsnetwork/rings-node':
-    specifier: https://github.com/RingsNetwork/rings-node/releases/download/v0.2.7/rings-v0.2.7-wasm32-unknown-unknown.tgz
-    version: '@github.com/RingsNetwork/rings-node/releases/download/v0.2.7/rings-v0.2.7-wasm32-unknown-unknown.tgz'
+    specifier: https://github.com/RingsNetwork/rings-node/releases/download/v0.3.0/rings-v0.3.0-wasm32-unknown-unknown.tgz
+    version: '@github.com/RingsNetwork/rings-node/releases/download/v0.3.0/rings-v0.3.0-wasm32-unknown-unknown.tgz'
   '@unocss/reset':
     specifier: ^0.50.6
     version: 0.50.6
@@ -17667,8 +17670,8 @@ packages:
       ethereumjs-util: 6.2.1
     dev: false
 
-  '@github.com/RingsNetwork/rings-node/releases/download/v0.2.7/rings-v0.2.7-wasm32-unknown-unknown.tgz':
-    resolution: {tarball: https://github.com/RingsNetwork/rings-node/releases/download/v0.2.7/rings-v0.2.7-wasm32-unknown-unknown.tgz}
+  '@github.com/RingsNetwork/rings-node/releases/download/v0.3.0/rings-v0.3.0-wasm32-unknown-unknown.tgz':
+    resolution: {tarball: https://github.com/RingsNetwork/rings-node/releases/download/v0.3.0/rings-v0.3.0-wasm32-unknown-unknown.tgz}
     name: '@ringsnetwork/rings-node'
     version: 0.2.6
     dev: false

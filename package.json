@@ -1,24 +1,24 @@
 {
-  "name": "@rings/webext-template",
-  "version": "0.2.0",
-  "description": "webext template powered by vite and react",
+  "name": "rings_extension",
+  "version": "0.3.0",
+  "description": "Browser Extension of rings network",
   "keywords": [
-    "react",
-    "vite",
     "extension",
     "chrome",
     "firefox",
-    "template"
+    "rings",
+    "p2p",
+    "wasm"
   ],
   "license": "GPLv3",
   "packageManager": "pnpm@7.23.0",
-  "homepage": "https://github.com/RingsNetwork/ext_v2",
+  "homepage": "https://github.com/RingsNetwork/rings_ext_v2",
   "repository": {
     "type": "git",
-    "url": "https://github.com/RingsNetwork/ext_v2"
+    "url": "https://github.com/RingsNetwork/rings_ext_v2"
   },
   "bugs": {
-    "url": "https://github.com/RingsNetwork/ext_v2/issues",
+    "url": "https://github.com/RingsNetwork/rings_ext_v2/issues",
     "email": "contact@ringsnetwork.io"
   },
   "author": "RingsNetwork",
@@ -55,8 +55,8 @@
     "@did-network/dapp-sdk": "^0.1.9",
     "@metamask/post-message-stream": "^6.1.1",
     "@metamask/providers": "^10.2.1",
+    "@rings/webext-template": "link:",
     "@ringsnetwork/bns-util": "^0.9.1",
-    "@ringsnetwork/rings-node": "https://github.com/RingsNetwork/rings-node/releases/download/v0.2.7/rings-v0.2.7-wasm32-unknown-unknown.tgz",
     "@unocss/reset": "^0.50.6",
     "buffer": "^6.0.3",
     "document-ready": "^2.0.2",
@@ -67,6 +67,7 @@
     "process": "^0.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "@ringsnetwork/rings-node": "https://github.com/RingsNetwork/rings-node/releases/download/v0.3.0/rings-v0.3.0-wasm32-unknown-unknown.tgz",
     "viem": "^0.3.21",
     "wagmi": "^1.0.2"
   },

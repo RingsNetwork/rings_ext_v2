@@ -221,9 +221,9 @@ async function connectByAddress(address: string) {
   }
 }
 
-async function createOffer() {
+async function createOffer(address: string) {
   if (currentClient) {
-    return (await currentClient.create_offer()) as string
+    return (await currentClient.create_offer(address)) as string
   }
 }
 

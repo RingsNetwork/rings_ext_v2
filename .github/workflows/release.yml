@@ -1,13 +1,11 @@
 name: Release
 on:
   push:
-    branches:
-      - v2
-      - v3
+    branches: main
 env:
   CI: true
 jobs:
-  version:
+  build:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
@@ -23,13 +21,36 @@ jobs:
         run: npm i pnpm@latest -g
       - name: install dependencies
         run: pnpm install --frozen-lockfile=false
-      - name: create and publish versions
-        uses: changesets/action@master
+
+      - name: get version
+        id: package-version
+        run: echo '::set-output name=version::$(node -p "require('./package.json').version")''
+
+      - name: build
+        run: pnpm build
+
+      - name: pack
+        run: |
+          pnpm run pack
+
+      - uses: actions/upload-artifact@v3
+      - name: upload
         with:
-          version: pnpm ci:version
-          commit: "chore: update versions"
-          title: "chore: update versions"
-          publish: pnpm ci:publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          path: |
+            extension.zip
+            extension.crx
+            extension.xpi
+          retention-days: 1
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+      - name: release
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: ${{ steps.package-version.outputs.version }}
+          prerelease: ${{ steps.package-version.outputs.version }} == 'prerelease' }}
+          title: ${{ needs.gen_version.outputs.version }}
+          files: |
+            LICENSE
+            extension.zip
+            extension.xrc
+            extension.xpi
