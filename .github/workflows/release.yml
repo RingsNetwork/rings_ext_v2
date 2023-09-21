@@ -49,8 +49,8 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: ${{ steps.package-version.outputs.version }}
-          prerelease: ${{ steps.package-version.outputs.version }} == 'prerelease' }}
-          title: ${{ needs.gen_version.outputs.version }}
+          prerelease: ${{ steps.package-version.outputs.version == 'prerelease' }}
+          title: ${{ steps.package-version.outputs.version }}
           files: |
             LICENSE
             extension.zip
