@@ -5,7 +5,6 @@ import { onMessage, sendMessage } from 'webext-bridge/popup'
 
 import { getStorage } from '~/utils/storage'
 
-import { Config } from './Config'
 import { NotificationPage } from './Notification'
 import { Status } from './Status'
 import { useConfig } from './store'
@@ -26,7 +25,6 @@ export function App() {
       const signed = await signMessage({
         message: data.auth,
       })
-
       return {
         signed,
       }
@@ -103,20 +101,9 @@ export function App() {
       <div>
         <Routes>
           <Route
-            path="/status"
-            element={
-              <Status
-                clients={clients}
-                loading={loading}
-                connectHandler={connectHandler}
-                destroyClient={destroyClient}
-              />
-            }
-          />
-          <Route
             path="/*"
             element={
-              <Config
+              <Status
                 urls={urls}
                 setUrls={setUrls}
                 clients={clients}

@@ -195,7 +195,6 @@ onMessage('init-background', async ({ data }) => {
 /**
  * extension method
  */
-
 async function connectRings(query: Record<string, string> = {}) {
   return await handlerNotification('connect', query)
 }
