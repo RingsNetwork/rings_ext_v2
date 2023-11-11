@@ -81,6 +81,11 @@ export function App() {
     }
   }, [address, connectAsync, connectors, loading, urls])
 
+  const connectSeed = useCallback(async () => {
+    if (loading) return
+    await sendMessage('connect-node', { url: urls.nodeUrl })
+  }, [loading, urls.nodeUrl])
+
   const destroyClient = useCallback(async () => {
     sendMessage('destroy-client', null)
 
@@ -110,6 +115,7 @@ export function App() {
                 connectHandler={connectHandler}
                 loading={loading}
                 destroyClient={destroyClient}
+                ringsBtnCallback={connectSeed}
               />
             }
           />

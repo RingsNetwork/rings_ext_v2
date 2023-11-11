@@ -164,9 +164,6 @@ onMessage('init-background', async ({ data }) => {
   }
   const client_ = await createRingsNodeClient(data)
   await client_?.listen()
-
-  let seed = data.nodeUrl.split(";");
-  console.log(seed)
   try {
     const promises = data.nodeUrl.split(';').map(async (url: string) => {
       return await client_?.connect_peer_via_http(url)
@@ -174,7 +171,7 @@ onMessage('init-background', async ({ data }) => {
     await Promise.any(promises)
     connected()
   } catch (e) {
-    console.error(2)
+    console.error(e)
   }
   invokeFindServiceNode()
 
@@ -188,6 +185,20 @@ onMessage('init-background', async ({ data }) => {
   }
 })
 
+// connect node seed
+onMessage("connect-node", async ({ data }) => {
+  if (!currentClient) return
+  let client_ = currentClient;
+  try {
+    const promises = data.url.split(';').map(async (url: string) => {
+      return await client_?.connect_peer_via_http(url)
+    })
+    await Promise.any(promises)
+    connected()
+  } catch (e) {
+    console.error(e)
+  }
+})
 /**
  * inpage methods
  */

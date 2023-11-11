@@ -17,6 +17,7 @@ declare module 'webext-bridge' {
         clients: any[]
       }
     >
+    'connect-node': ProtocolWithReturn<{ url: string }, any>
     'sign-message': ProtocolWithReturn<{ auth: string }, { signed: string }>
     'check-status': ProtocolWithReturn<
       any,

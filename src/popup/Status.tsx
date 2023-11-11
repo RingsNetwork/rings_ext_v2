@@ -13,6 +13,7 @@ export const Status = ({
   connectHandler,
   loading,
   destroyClient,
+  ringsBtnCallback,
 }: {
   urls: {
     turnUrl: string
@@ -23,6 +24,7 @@ export const Status = ({
   connectHandler: () => Promise<void>
   loading: boolean
   destroyClient: () => Promise<void>
+  ringsBtnCallback: () => Promise<void>
 }) => {
   const { connect, connectors, isLoading, pendingConnector } = useConnect()
   const { address, isConnected } = useAccount()
@@ -219,7 +221,7 @@ export const Status = ({
           index={4}
           lineLength={50}
           segmentProportion={0.3} // For example, 60% of the line is the first segment
-          onClick={() => {}}
+          onClick={ringsBtnCallback}
         />
         <ConfigFields />
       </div>
