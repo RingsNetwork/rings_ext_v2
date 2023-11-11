@@ -1,1 +1,1 @@
-export const URL_STORE_KEY = 'serverUrls'
+export const URL_STORE_KEY = 'ICE_AND_SEED_URLS'

@@ -1,6 +1,7 @@
 import init, {
   Client,
   MessageCallbackInstance,
+  debug
 } from '@ringsnetwork/rings-node'
 
 import { onMessage, sendMessage } from 'webext-bridge/background'
@@ -56,9 +57,6 @@ const requestHandlerMap: Record<string, any> = {
   sendMessage: sendRingsMessage,
   asyncSendMessage,
   connectByAddress,
-  createOffer,
-  answerOffer,
-  acceptAnswer,
   disconnect,
   getNodeInfo,
   getServiceNodes,
@@ -165,13 +163,19 @@ onMessage('init-background', async ({ data }) => {
     }
   }
   const client_ = await createRingsNodeClient(data)
-
   await client_?.listen()
 
-  const promises = data.nodeUrl.split(';').map(async (url: string) => await client_?.connect_peer_via_http(url))
-  await Promise.any(promises)
-
-  connected()
+  let seed = data.nodeUrl.split(";");
+  console.log(seed)
+  try {
+    const promises = data.nodeUrl.split(';').map(async (url: string) => {
+      return await client_?.connect_peer_via_http(url)
+    })
+    await Promise.any(promises)
+    connected()
+  } catch (e) {
+    console.error(2)
+  }
   invokeFindServiceNode()
 
   const info = await client_?.get_node_info()
@@ -218,24 +222,6 @@ async function sendRingsMessage(to: string, message: string) {
 async function connectByAddress(address: string) {
   if (currentClient && currentAccount) {
     return await currentClient.connect_with_address(address, getAddressWithType(currentAccount).type)
-  }
-}
-
-async function createOffer(address: string) {
-  if (currentClient) {
-    return (await currentClient.create_offer(address)) as string
-  }
-}
-
-async function answerOffer(offer: string) {
-  if (currentClient && offer) {
-    return await currentClient.answer_offer(offer)
-  }
-}
-
-async function acceptAnswer(transportId: any, answer: any) {
-  if (currentClient && transportId) {
-    return await currentClient.accept_answer(answer)
   }
 }
 
@@ -359,6 +345,7 @@ async function createRingsNodeClient({
   nodeUrl: string
 }) {
   try {
+    console.log(turnUrl, nodeUrl, account)
     if (currentClient && currentAccount === account) {
       return
     }
@@ -367,11 +354,12 @@ async function createRingsNodeClient({
       try {
         wasmInit = await init(browser.runtime.getURL('dist/background/rings_node_bg.wasm'))
         initSuccess()
+        debug(true)
+        console.log("Successfuly init WASM module")
       } catch (error) {
         initFailed()
       }
     }
-
     connecting()
 
     let signer = async (proof: string): Promise<Uint8Array> => {
@@ -399,11 +387,11 @@ async function createRingsNodeClient({
       // callback
       callback
     )
+    console.log("successfully created client")
     currentAccount = account
     currentClient = client_
     clients.push(client_)
     return client_
-
   } catch (e) {
     console.error(e)
   }
