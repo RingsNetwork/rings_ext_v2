@@ -68,7 +68,6 @@ const CircProgressBar: React.FC<CircProgressBarProps> = ({ labels, index, lineLe
             }}
             onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.95)')}
             onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-            onClick={onClick}
           >
             <circle
               cx={viewBoxSize}
@@ -80,6 +79,9 @@ const CircProgressBar: React.FC<CircProgressBarProps> = ({ labels, index, lineLe
               strokeDasharray={`${dashArray} ${circumference}`}
               strokeLinecap="round"
               transform={`rotate(-90 ${viewBoxSize} ${viewBoxSize})`}
+              onClick={(e) => {
+                onClick()
+              }}
             />
           </g>
           {/* Measure points, lines, and labels */}
@@ -113,6 +115,7 @@ const CircProgressBar: React.FC<CircProgressBarProps> = ({ labels, index, lineLe
                 />
                 {/* Label */}
                 <text
+                  className="select-none"
                   x={horizontalEndX}
                   y={horizontalEndY}
                   fill={isReached ? '#ef4444' : '#000'}

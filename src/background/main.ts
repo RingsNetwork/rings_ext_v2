@@ -164,21 +164,6 @@ onMessage('init-background', async ({ data }) => {
   }
   const client_ = await createRingsNodeClient(data)
   await client_?.listen()
-  try {
-    const promises = data.nodeUrl.split(';').map(async (url: string) => {
-      return await client_?.connect_peer_via_http(url)
-    })
-    await Promise.any(promises)
-    connected()
-  } catch (e) {
-    console.error(e)
-  }
-  invokeFindServiceNode()
-
-  const info = await client_?.get_node_info()
-  console.log(info)
-  toggleIcon()
-
   return {
     clients,
     address: client_!.address,
@@ -198,6 +183,8 @@ onMessage("connect-node", async ({ data }) => {
   } catch (e) {
     console.error(e)
   }
+  invokeFindServiceNode()
+
 })
 /**
  * inpage methods

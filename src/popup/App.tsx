@@ -81,10 +81,19 @@ export function App() {
     }
   }, [address, connectAsync, connectors, loading, urls])
 
+  const connectHandler = useCallback(async () => {
+    if (!clients.length) {
+      await createClient()
+    }
+  }, [clients, createClient])
+
   const connectSeed = useCallback(async () => {
+    console.log('connect-node event init')
     if (loading) return
+    connectHandler()
     await sendMessage('connect-node', { url: urls.nodeUrl })
-  }, [loading, urls.nodeUrl])
+    console.log('connect-node event sent')
+  }, [loading, urls.nodeUrl, connectHandler])
 
   const destroyClient = useCallback(async () => {
     sendMessage('destroy-client', null)
@@ -92,12 +101,6 @@ export function App() {
     const data = await sendMessage('check-status', null)
     setClients(data.clients)
   }, [])
-
-  const connectHandler = useCallback(async () => {
-    if (!clients.length) {
-      await createClient()
-    }
-  }, [clients, createClient])
 
   return new URLSearchParams(location.search).get('notification') ? (
     <NotificationPage connectHandler={connectHandler} loading={loading} />
