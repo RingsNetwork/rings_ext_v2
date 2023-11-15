@@ -8,7 +8,7 @@ import { URL_STORE_KEY } from '../constants/storage-key'
 // _urls is a atomic ref
 const _urls = atom({
   turnUrl: import.meta.env.RINGS_ICE_URL || 'stun://stun.l.google.com:19302',
-  nodeUrl: import.meta.env.RINGS_PUBLIC_NODE_SEED_URL || '',
+  nodeUrl: import.meta.env.RINGS_PUBLIC_NODE_SEED_URL || 'https://test41.rings.rs',
 })
 
 // check a ref is undefined
