@@ -101,17 +101,21 @@ export function App() {
     } catch (e) {
       console.error(e)
       throw Error(JSON.stringify(e))
+      setLoading(false)
     } finally {
       setLoading(false)
     }
   }, [loading, urls, clients, createClient])
 
   const destroyClient = useCallback(async () => {
+    if (!clients.length) {
+      return
+    }
+    setLoading(true)
     sendMessage('destroy-client', null)
-
-    const data = await sendMessage('get-client', null)
-    setClients(data.clients)
-  }, [])
+    setClients([])
+    setLoading(false)
+  }, [clients])
 
   return new URLSearchParams(location.search).get('notification') ? (
     <NotificationPage connectHandler={connectHandler} loading={loading} />
@@ -129,7 +133,13 @@ export function App() {
                 connectHandler={connectHandler}
                 loading={loading}
                 destroyClient={destroyClient}
-                ringsBtnCallback={connectSeed}
+                ringsBtnCallback={async () => {
+                  if (!clients.length) {
+                    connectSeed()
+                  } else {
+                    destroyClient()
+                  }
+                }}
               />
             }
           />
