@@ -19,7 +19,7 @@ const CircProgressBar: React.FC<CircProgressBarProps> = ({ labels, index, lineLe
   const viewBoxSize = svgSize / 2 // Adjust viewbox to keep circle centered
   const circumference = 2 * Math.PI * radius // Circumference of the circle
   // Calculate the stroke dash array for the progress, adjusted to the index + 1
-  const dashArray = labels.length === 0 && index >= 1 ? circumference : (index / totalMeasures) * circumference
+  const dashArray = labels.length === 0 && index === 0 ? 0 : (index / totalMeasures) * circumference
 
   // Function to calculate line points and determine the side of the circle
   const calculateLinePoints = (idx: number, total: number, length: number) => {
@@ -40,9 +40,11 @@ const CircProgressBar: React.FC<CircProgressBarProps> = ({ labels, index, lineLe
   return (
     <div className="flex justify-center items-center">
       <div className="relative flex justify-center items-center h-[400px] w-[400px]">
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <BlackHoleCanvas width={svgSize / 2} height={svgSize / 2} />
-        </div>
+        {labels.length !== 0 || index !== 0 ? (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <BlackHoleCanvas width={svgSize / 2} height={svgSize / 2} />
+          </div>
+        ) : null}
         <svg
           width={svgSize}
           height={svgSize}
@@ -77,7 +79,7 @@ const CircProgressBar: React.FC<CircProgressBarProps> = ({ labels, index, lineLe
               stroke="#ef4444"
               strokeWidth="10"
               strokeDasharray={`${dashArray} ${circumference}`}
-              strokeLinecap="round"
+              strokeLinecap={index > 0 ? 'round' : 'butt'}
               transform={`rotate(-90 ${viewBoxSize} ${viewBoxSize})`}
               onClick={(e) => {
                 onClick()

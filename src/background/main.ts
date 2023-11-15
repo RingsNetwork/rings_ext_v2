@@ -114,7 +114,7 @@ const gen_callback = (): MessageCallbackInstance => {
 }
 
 
-onMessage('check-status', async () => {
+onMessage('get-client', async () => {
   return {
     clients,
     currentAccount,
@@ -134,22 +134,41 @@ onMessage('get-peers', async () => {
 onMessage('request-handler', async ({ data }) => {
   const { requestId, method, params } = data
 
+  if (!currentClient) return {
+    success: false,
+    requestId,
+  }
+
+  let _client = currentClient;
   if (method && requestHandlerMap[method]) {
     try {
       const data = await requestHandlerMap[method](params)
       return {
         success: true,
         requestId,
-        data,
+        ...data,
       }
     } catch (error) {
       return { requestId, ...handlerError(error) }
     }
   }
 
+  if (method) {
+    try {
+      const resp = await _client.request(method, params)
+      return {
+        success: true,
+        requestId,
+        native: true,
+        result: resp.result,
+      }
+    } catch (error) {
+      console.error(error)
+      return { requestId, ...handlerError(error) }
+    }
+  }
   return {
-    success: true,
-    currentAccount,
+    success: false,
     requestId,
   }
 })
@@ -164,6 +183,7 @@ onMessage('init-background', async ({ data }) => {
   }
   const client_ = await createRingsNodeClient(data)
   await client_?.listen()
+  toggleIcon('active')
   return {
     clients,
     address: client_!.address,
@@ -330,6 +350,7 @@ async function destroyClient() {
   serviceNodes.clear()
 
   disconnected()
+  console.log("successfully destory client")
 }
 
 async function createRingsNodeClient({
@@ -351,7 +372,7 @@ async function createRingsNodeClient({
       try {
         wasmInit = await init(browser.runtime.getURL('dist/background/rings_node_bg.wasm'))
         initSuccess()
-        debug(true)
+        debug(false)
         console.log("Successfuly init WASM module")
       } catch (error) {
         initFailed()

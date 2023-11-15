@@ -15,12 +15,14 @@ export function App() {
   const [clients, setClients] = useState<any[]>([])
 
   useEffect(() => {
+    // get client from background
     ;(async () => {
-      const data = await sendMessage('check-status', null)
+      const data = await sendMessage('get-client', null)
       console.log(data.clients)
       setClients(data.clients)
     })()
 
+    // handle sign messge from background
     onMessage('sign-message', async ({ data }) => {
       const signed = await signMessage({
         message: data.auth,
@@ -88,17 +90,20 @@ export function App() {
   }, [clients, createClient])
 
   const connectSeed = useCallback(async () => {
-    console.log('connect-node event init')
     if (loading) return
-    connectHandler()
+    setLoading(true)
+    if (!clients.length) {
+      await createClient()
+    }
+    console.log('connecting seed node')
     await sendMessage('connect-node', { url: urls.nodeUrl })
-    console.log('connect-node event sent')
-  }, [loading, urls.nodeUrl, connectHandler])
+    setLoading(false)
+  }, [loading, urls, clients, createClient])
 
   const destroyClient = useCallback(async () => {
     sendMessage('destroy-client', null)
 
-    const data = await sendMessage('check-status', null)
+    const data = await sendMessage('get-client', null)
     setClients(data.clients)
   }, [])
 

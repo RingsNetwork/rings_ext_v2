@@ -66,7 +66,9 @@ export const Status = ({
             className="px-4 h-full flex-center text-xs text-black  active:bg-#2E2E3A active:bg-opacity-5"
             disabled={!connector.ready}
             key={connector.id}
-            onClick={() => (isConnected ? setShow(!show) : connect({ connector }))}
+            onClick={(e) => {
+              isConnected ? setShow(!show) : connect({ connector })
+            }}
           >
             {isLoading && pendingConnector?.id === connector.id && (
               <span className="w-4 h-4 i-eos-icons:loading"></span>
@@ -185,44 +187,68 @@ export const Status = ({
             Disconnect
           </span>
         </div>
+        <div className="p-2.5 flex items-center justify-between text-xs border-solid border-t border-gray-300">
+          <span
+            onClick={() => {
+              disconnect()
+              setShow(false)
+            }}
+            className="cursor-pointer scale-80 origin-left transition-all hover:translate-x-.25 underline underline-current"
+          >
+            Configure
+          </span>
+        </div>
       </div>
     )
   }
-  return (
-    <div className="w-358px h-400px flex-col-center font-pixel antialiased">
-      <div className="w-full h-full">
-        <div className="relative p-2.5 flex justify-between items-center border-solid border-b border-gray-300">
-          <div className="flex-1 text-xs">RingsNetwork</div>
-          <PKIConnectStatus className={'h-7 border-angle fake-border bg-white'} />
-          <div className="relative ml-2.5 w-7 h-7 flex-col-center border-angle">
-            <span
-              className={`absolute w-6 h-6 cursor-pointer transition-all ${
-                clients.length
-                  ? 'text-#15CD96 i-eos-icons:network-policy'
-                  : 'text-#fb7185 i-eos-icons:network-policy-outlined'
-              } ${loading ? 'scale-x-0' : ''}`}
-              onClick={() => {
-                if (!clients.length) {
-                  connectHandler()
-                } else {
-                  setShow(!show)
-                }
-              }}
-            ></span>
-            <span
-              className={`absolute w-6 h-6 cursor-pointer transition-all text-#15CD96 i-eos-icons:loading ${
-                loading ? '' : 'scale-x-0'
-              }`}
-            ></span>
-          </div>
+
+  const Nav = () => {
+    return (
+      <nav className="relative p-2.5 flex justify-between items-center border-solid border-b border-gray-300">
+        <div className="flex-1 text-xs">Rings Network</div>
+        <PKIConnectStatus className={'h-7 border-angle fake-border bg-white'} />
+        <div className="relative ml-2.5 w-7 h-7 flex-col-center border-angle">
+          <span
+            className={`absolute w-6 h-6 cursor-pointer transition-all ${
+              clients.length ? 'text-red i-eos-icons:molecules' : 'text-gray i-eos-icons:molecules-outlined'
+            } ${loading ? 'scale-x-0' : ''}`}
+            onClick={() => {
+              if (!clients.length) {
+                connectHandler()
+              } else {
+                setShow(!show)
+              }
+            }}
+          ></span>
+          <span
+            className={`absolute w-6 h-6 cursor-pointer transition-all text-#15CD96 i-eos-icons:loading ${
+              loading ? '' : 'scale-x-0'
+            }`}
+          ></span>
         </div>
+      </nav>
+    )
+  }
+
+  const RingsBtn = () => {
+    return (
+      <div>
         <CircProgressBar
-          labels={['offer', 'answer', 'handshake', 'connected']}
-          index={4}
+          labels={[]}
+          index={clients.length}
           lineLength={50}
           segmentProportion={0.3} // For example, 60% of the line is the first segment
           onClick={ringsBtnCallback}
         />
+      </div>
+    )
+  }
+
+  return (
+    <div className="w-358px h-400px flex-col-center font-pixel antialiased">
+      <div className="w-full h-full">
+        <Nav />
+        <RingsBtn />
         <ConfigFields />
       </div>
 
