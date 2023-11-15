@@ -92,12 +92,18 @@ export function App() {
   const connectSeed = useCallback(async () => {
     if (loading) return
     setLoading(true)
-    if (!clients.length) {
-      await createClient()
+    try {
+      if (!clients.length) {
+        await createClient()
+      }
+      console.log('connecting seed node')
+      await sendMessage('connect-node', { url: urls.nodeUrl })
+    } catch (e) {
+      console.error(e)
+      throw Error(JSON.stringify(e))
+    } finally {
+      setLoading(false)
     }
-    console.log('connecting seed node')
-    await sendMessage('connect-node', { url: urls.nodeUrl })
-    setLoading(false)
   }, [loading, urls, clients, createClient])
 
   const destroyClient = useCallback(async () => {

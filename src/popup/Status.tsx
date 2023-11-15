@@ -30,8 +30,8 @@ export const Status = ({
   const { address, isConnected } = useAccount()
   const { chain } = useNetwork()
   const { disconnect } = useDisconnect()
-
-  const [show, setShow] = useState(false)
+  const [currentTab, setCurrentTab] = useState('main')
+  const [showModal, setShowModal] = useState(false)
   const contentRef = useRef<HTMLDivElement | null>(null)
 
   const [switcherShow, setSwitcherShow] = useState(false)
@@ -67,7 +67,7 @@ export const Status = ({
             disabled={!connector.ready}
             key={connector.id}
             onClick={(e) => {
-              isConnected ? setShow(!show) : connect({ connector })
+              isConnected ? setShowModal(!showModal) : connect({ connector })
             }}
           >
             {isLoading && pendingConnector?.id === connector.id && (
@@ -115,6 +115,16 @@ export const Status = ({
         <div className="bg-gray-100 text-xs px-1 py-1 leading-3 text-slate-600">
           Seeds url is a URL list, which are working as entrypoint of rings network
         </div>
+        <div className="p-2.5 flex items-center justify-between text-xs border-solid border-t border-gray-300">
+          <span
+            onClick={() => {
+              setCurrentTab('main')
+            }}
+            className="cursor-pointer scale-80 origin-left transition-all hover:translate-x-.25 underline underline-current p-2 text-l"
+          >
+            Back
+          </span>
+        </div>
       </div>
     )
   }
@@ -137,7 +147,7 @@ export const Status = ({
             onClick={async () => {
               if (clients.length > 0) {
                 await destroyClient()
-                setShow(false)
+                setShowModal(false)
               }
             }}
           >
@@ -180,7 +190,7 @@ export const Status = ({
           <span
             onClick={() => {
               disconnect()
-              setShow(false)
+              setShowModal(false)
             }}
             className="cursor-pointer scale-80 origin-right transition-all hover:translate-x-.25 underline underline-current"
           >
@@ -190,8 +200,8 @@ export const Status = ({
         <div className="p-2.5 flex items-center justify-between text-xs border-solid border-t border-gray-300">
           <span
             onClick={() => {
-              disconnect()
-              setShow(false)
+              setCurrentTab('config')
+              setShowModal(false)
             }}
             className="cursor-pointer scale-80 origin-left transition-all hover:translate-x-.25 underline underline-current"
           >
@@ -216,7 +226,7 @@ export const Status = ({
               if (!clients.length) {
                 connectHandler()
               } else {
-                setShow(!show)
+                setShowModal(!showModal)
               }
             }}
           ></span>
@@ -248,15 +258,15 @@ export const Status = ({
     <div className="w-358px h-400px flex-col-center font-pixel antialiased">
       <div className="w-full h-full">
         <Nav />
-        <RingsBtn />
-        <ConfigFields />
+        {currentTab === 'main' && <RingsBtn />}
+        {currentTab === 'config' && <ConfigFields />}
       </div>
 
       {/* <!-- modal --> */}
       <div
-        className={`fixed top-0 left-0 right-0 bottom-0 bg-gray/10 block ${show ? 'block' : '!hidden'} `}
+        className={`fixed top-0 left-0 right-0 bottom-0 bg-gray/10 block ${showModal ? 'block' : '!hidden'} `}
         onClick={(e) => {
-          !contentRef.current?.contains(e.target as Node) && setShow(false)
+          !contentRef.current?.contains(e.target as Node) && setShowModal(false)
         }}
       >
         <PeersStatusModal />
