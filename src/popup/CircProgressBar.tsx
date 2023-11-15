@@ -51,9 +51,7 @@ const CircProgressBar: React.FC<CircProgressBarProps> = ({ labels, index, lineLe
           viewBox={`0 0 ${svgSize} ${svgSize}`}
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
         >
-          {/* Background circle */}
           <circle cx={viewBoxSize} cy={viewBoxSize} r={radius} fill="none" stroke="#e5e7eb" strokeWidth="10" />
-          {/* Foreground circle showing progress */}
           <g
             style={{
               cursor: 'pointer',

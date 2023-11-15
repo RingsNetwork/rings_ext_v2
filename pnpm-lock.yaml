@@ -21,8 +21,8 @@ dependencies:
     specifier: 'link:'
     version: 'link:'
   '@ringsnetwork/rings-node':
-    specifier: https://github.com/RingsNetwork/rings-node/releases/download/v0.3.0/rings-v0.3.0-wasm32-unknown-unknown.tgz
-    version: '@github.com/RingsNetwork/rings-node/releases/download/v0.3.0/rings-v0.3.0-wasm32-unknown-unknown.tgz'
+    specifier: https://github.com/RingsNetwork/rings-node/releases/download/v0.3.4/rings-v0.3.4-wasm32-unknown-unknown.tgz
+    version: '@github.com/RingsNetwork/rings-node/releases/download/v0.3.4/rings-v0.3.4-wasm32-unknown-unknown.tgz'
   '@unocss/reset':
     specifier: ^0.50.6
     version: 0.50.6
@@ -9891,8 +9891,8 @@ packages:
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
 
-  '@github.com/RingsNetwork/rings-node/releases/download/v0.3.0/rings-v0.3.0-wasm32-unknown-unknown.tgz':
-    resolution: {tarball: https://github.com/RingsNetwork/rings-node/releases/download/v0.3.0/rings-v0.3.0-wasm32-unknown-unknown.tgz}
+  '@github.com/RingsNetwork/rings-node/releases/download/v0.3.4/rings-v0.3.4-wasm32-unknown-unknown.tgz':
+    resolution: {tarball: https://github.com/RingsNetwork/rings-node/releases/download/v0.3.4/rings-v0.3.4-wasm32-unknown-unknown.tgz}
     name: '@ringsnetwork/rings-node'
-    version: 0.2.6
+    version: 0.3.4
     dev: false

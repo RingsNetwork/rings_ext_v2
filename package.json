@@ -56,7 +56,7 @@
     "@metamask/post-message-stream": "^6.1.1",
     "@metamask/providers": "^10.2.1",
     "@rings/webext-template": "link:",
-    "@ringsnetwork/rings-node": "git+file:../rings-node#668a71735b9baa653c60c5ceeeaa3499adb9fc74",
+    "@ringsnetwork/rings-node": "https://github.com/RingsNetwork/rings-node/releases/download/v0.3.4/rings-v0.3.4-wasm32-unknown-unknown.tgz",
     "@unocss/reset": "^0.50.6",
     "buffer": "^6.0.3",
     "document-ready": "^2.0.2",
