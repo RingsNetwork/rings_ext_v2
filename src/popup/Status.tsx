@@ -254,14 +254,24 @@ export const Status = ({
     )
   }
 
+  const TabBar = () => {
+    return (
+      <div className="w-full flex justify-center items-end bg-white p-4 shadow-md">
+        <button className="text-xl flex-grow">🌐</button>
+        <button className="text-3xl text-red-500 mx-4 flex-grow">⭕</button>
+        <button className="text-3xl flex-grow">⚙</button>
+      </div>
+    )
+  }
+
   return (
     <div className="w-358px h-400px flex-col-center font-pixel antialiased">
       <div className="w-full h-full">
         <Nav />
         {currentTab === 'main' && <RingsBtn />}
         {currentTab === 'config' && <ConfigFields />}
+        <TabBar />
       </div>
-
       {/* <!-- modal --> */}
       <div
         className={`fixed top-0 left-0 right-0 bottom-0 bg-gray/10 block ${showModal ? 'block' : '!hidden'} `}
