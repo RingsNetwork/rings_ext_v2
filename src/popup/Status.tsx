@@ -329,7 +329,7 @@ export const Status = ({
           </div>
           <div className="mb-1">
             <label>DID: </label>
-            <span>{shorten(status.dht?.did, 20)}</span>
+            <span>{shorten(status.swarm?.dht?.did, 20)}</span>
           </div>
           <div className="mt-4">
             <label>Successors: </label>

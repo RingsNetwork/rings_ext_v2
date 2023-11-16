@@ -396,7 +396,7 @@ async function createRingsNodeClient({
       try {
         wasmInit = await init(browser.runtime.getURL('dist/background/rings_node_bg.wasm'))
         initSuccess()
-        debug(false)
+        debug(true)
         console.log("Successfuly init WASM module")
       } catch (error) {
         initFailed()
@@ -418,8 +418,8 @@ async function createRingsNodeClient({
     let client_: Client = await new Client(
       // ice_servers
       turnUrl,
-      // stable_tineout
-      100,
+      // stable_timeout
+      60,
       // account
       account,
       // account type
