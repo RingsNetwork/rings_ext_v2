@@ -1,6 +1,7 @@
 import { shorten } from '@did-network/dapp-sdk'
 import { useAccount, useConnect, useDisconnect, useNetwork } from 'wagmi'
 import { sendMessage } from 'webext-bridge/popup'
+import browser from 'webextension-polyfill'
 
 import type { Peer } from '../background/utils'
 import CircProgressBar from './CircProgressBar'
@@ -40,6 +41,13 @@ export const Status = ({
 
   const [peers, setPeers] = useState<Peer[]>([])
   const [serviceNodes, setServiceNodes] = useState<string[]>([])
+
+  const forceReset = async () => {
+    await browser.storage.local.clear()
+    await browser.storage.sync.clear()
+    await browser.runtime.reload()
+  }
+
   const getPeers = useCallback(async () => {
     const res = await sendMessage('get-peers', null)
 
@@ -57,6 +65,14 @@ export const Status = ({
       clearInterval(timer)
     }
   }, [getPeers])
+
+  // return status of connected node
+  const connectedNodeStatus = () => {
+    if (!status) return 'offline'
+    if (!status.swarm) return 'offline'
+    if (status.swarm?.connections == 0) return 'offline'
+    return status.swarm.connections[0].state
+  }
 
   // This function will read global values.
   // connect status of PKI (E.g Metamask)
@@ -140,9 +156,7 @@ export const Status = ({
         <div className="p-2.5 flex items-center justify-between text-xs border-solid border-b border-gray-300">
           <span className={`scale-80 origin-left`}>
             Network Status:{' '}
-            <span className={`${clients.length ? 'text-#15CD96' : 'text-#fb7185 '}`}>
-              {clients.length ? `online` : 'offline'}
-            </span>
+            <span className={`${clients.length ? 'text-#15CD96' : 'text-#fb7185 '}`}>{connectedNodeStatus()}</span>
           </span>
           <span
             className="flex-1 text-right scale-80 origin-right cursor-pointer transition-all hover:translate-x-.25 underline underline-current"
@@ -210,6 +224,16 @@ export const Status = ({
             Configure
           </span>
         </div>
+        <div className="p-2.5 flex items-center justify-between text-xs border-solid border-t border-gray-300">
+          <span
+            onClick={() => {
+              forceReset()
+            }}
+            className="cursor-pointer scale-80 origin-left transition-all hover:translate-x-.25 underline underline-current"
+          >
+            Force Reset
+          </span>
+        </div>
       </div>
     )
   }
@@ -225,11 +249,7 @@ export const Status = ({
               clients.length ? 'text-red i-eos-icons:molecules' : 'text-gray i-eos-icons:molecules-outlined'
             } ${loading ? 'scale-x-0' : ''}`}
             onClick={() => {
-              if (!clients.length) {
-                connectHandler()
-              } else {
-                setShowModal(!showModal)
-              }
+              setShowModal(!showModal)
             }}
           ></span>
           <span
@@ -242,7 +262,7 @@ export const Status = ({
     )
   }
 
-  const RingsBtn = () => {
+  const RingsBtn = ({ clients }: { clients: any[] }) => {
     return (
       <div>
         <CircProgressBar
@@ -340,7 +360,7 @@ export const Status = ({
     <div className="w-358px h-550px flex-col-center font-pixel antialiased">
       <div className="w-full h-full">
         <Nav />
-        {currentTab === 'main' && <RingsBtn />}
+        {currentTab === 'main' && <RingsBtn clients={clients} />}
         {currentTab === 'config' && <ConfigFields />}
         {currentTab === 'status' && <ConnectStatus />}
         <TabBar />
