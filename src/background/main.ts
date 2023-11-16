@@ -46,6 +46,7 @@ let serviceNodes = new Map<string, any[]>()
 let messagePromiseMap = new Map<string, { resolve: Function; reject: Function }>()
 let messageStatusMap = new Map<string, string | Record<string, any>>()
 let messageIntervalMap = new Map<string, number>()
+let watcherId: any = null
 
 /**
  * inpage provider request method map
@@ -139,7 +140,7 @@ onMessage('request-handler', async ({ data }) => {
     requestId,
   }
 
-  let _client = currentClient;
+  let client_ = currentClient;
   if (method && requestHandlerMap[method]) {
     try {
       const data = await requestHandlerMap[method](params)
@@ -155,7 +156,7 @@ onMessage('request-handler', async ({ data }) => {
 
   if (method) {
     try {
-      const resp = await _client.request(method, params)
+      const resp = await client_?.request(method, params)
       return {
         success: true,
         requestId,
@@ -183,6 +184,7 @@ onMessage('init-background', async ({ data }) => {
   }
   const client_ = await createRingsNodeClient(data)
   await client_?.listen()
+  await statusWatcher()
   toggleIcon('active')
   return {
     clients,
@@ -196,7 +198,9 @@ onMessage("connect-node", async ({ data }) => {
   let client_ = currentClient;
   try {
     const promises = data.url.split(';').map(async (url: string) => {
+
       return await client_?.connect_peer_via_http(url)
+
     })
     await Promise.any(promises)
     connected()
@@ -341,6 +345,8 @@ async function destroyClient() {
         1
       )
     currentClient = null
+    clearInterval(watcherId)
+    watcherId = null;
   }
 
   if (currentAccount) {
@@ -352,6 +358,26 @@ async function destroyClient() {
   disconnected()
   console.log("successfully destory client")
 }
+
+async function statusWatcher() {
+  let interval = 500
+
+  let lastStatus: object | undefined;
+  watcherId = setInterval(() => {
+    if (!currentClient) return
+    let client_ = currentClient;
+    (async () => {
+      const newValue = await client_?.request('nodeInfo', []);
+      if (lastStatus === undefined || JSON.stringify(newValue) !== JSON.stringify(lastStatus)) {
+        if (newValue !== undefined) {
+          lastStatus = newValue;
+          await sendMessage("node-status-change", lastStatus!, "popup");
+        }
+      }
+    })()
+  }, interval);
+}
+
 
 async function createRingsNodeClient({
   turnUrl,

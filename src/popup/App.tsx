@@ -13,6 +13,7 @@ export function App() {
   const { address } = useAccount()
   const { connectors, connectAsync } = useConnect()
   const [clients, setClients] = useState<any[]>([])
+  const [ringsStatus, setRingsStatus] = useState<any[]>([])
 
   useEffect(() => {
     // get client from background
@@ -31,7 +32,12 @@ export function App() {
         signed,
       }
     })
-  }, [])
+
+    onMessage('node-status-change', async ({ data }) => {
+      setRingsStatus(data.result?.swarm)
+      console.log(data.result?.swarm)
+    })
+  }, [ringsStatus])
 
   const [loading, setLoading] = useState(false)
 

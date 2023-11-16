@@ -22,7 +22,7 @@ async function createEvent(
       name,
       data: args,
     },
-    'content-script@' + (tabs?.[0]?.id || 0).toString(),
+    'content-script@' + (tabs?.[0]?.id || 0).toString()
   )
 }
 

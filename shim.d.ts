@@ -38,6 +38,7 @@ declare module 'webext-bridge' {
         requestId: number
       } & Record<string, any>
     >
+    'node-status-change': ProtocolWithReturn<Record<string, any>, any>
     'destroy-client': any
     'get-peers': ProtocolWithReturn<any, any>
     getWindowInfo: ProtocolWithReturn<
