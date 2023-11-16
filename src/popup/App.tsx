@@ -117,8 +117,9 @@ export function App() {
       return
     }
     setLoading(true)
-    sendMessage('destroy-client', null)
     setClients([])
+    await sendMessage('destroy-client', null)
+    setRingsStatus([])
     setLoading(false)
   }, [clients])
 
@@ -140,6 +141,7 @@ export function App() {
                 loading={loading}
                 destroyClient={destroyClient}
                 ringsBtnCallback={async () => {
+                  console.log('click', clients.length)
                   if (!clients.length) {
                     connectSeed()
                   } else {
