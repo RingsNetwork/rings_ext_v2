@@ -23,7 +23,7 @@ const setupPageStream = () => {
   pageStream.on('data', async (data) => {
     if (data?.type === 'request') {
       const res = await sendMessage('request-handler', data as any)
-
+      console.log('content script:', res)
       pageStream.write({
         type: 'request',
         payload: res,

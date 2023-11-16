@@ -1,6 +1,7 @@
 import init, {
   Client,
   MessageCallbackInstance,
+  debug
 } from '@ringsnetwork/rings-node'
 
 import { onMessage, sendMessage } from 'webext-bridge/background'
@@ -45,6 +46,7 @@ let serviceNodes = new Map<string, any[]>()
 let messagePromiseMap = new Map<string, { resolve: Function; reject: Function }>()
 let messageStatusMap = new Map<string, string | Record<string, any>>()
 let messageIntervalMap = new Map<string, number>()
+let watcherId: any = null
 
 /**
  * inpage provider request method map
@@ -56,9 +58,6 @@ const requestHandlerMap: Record<string, any> = {
   sendMessage: sendRingsMessage,
   asyncSendMessage,
   connectByAddress,
-  createOffer,
-  answerOffer,
-  acceptAnswer,
   disconnect,
   getNodeInfo,
   getServiceNodes,
@@ -116,7 +115,7 @@ const gen_callback = (): MessageCallbackInstance => {
 }
 
 
-onMessage('check-status', async () => {
+onMessage('get-client', async () => {
   return {
     clients,
     currentAccount,
@@ -136,22 +135,41 @@ onMessage('get-peers', async () => {
 onMessage('request-handler', async ({ data }) => {
   const { requestId, method, params } = data
 
+  if (!currentClient) return {
+    success: false,
+    requestId,
+  }
+
+  let client_ = currentClient;
   if (method && requestHandlerMap[method]) {
     try {
       const data = await requestHandlerMap[method](params)
       return {
         success: true,
         requestId,
-        data,
+        ...data,
       }
     } catch (error) {
       return { requestId, ...handlerError(error) }
     }
   }
 
+  if (method) {
+    try {
+      const resp = await client_?.request(method, params)
+      return {
+        success: true,
+        requestId,
+        native: true,
+        result: resp.result,
+      }
+    } catch (error) {
+      console.error(error)
+      return { requestId, ...handlerError(error) }
+    }
+  }
   return {
-    success: true,
-    currentAccount,
+    success: false,
     requestId,
   }
 })
@@ -165,25 +183,33 @@ onMessage('init-background', async ({ data }) => {
     }
   }
   const client_ = await createRingsNodeClient(data)
-
   await client_?.listen()
-
-  const promises = data.nodeUrl.split(';').map(async (url: string) => await client_?.connect_peer_via_http(url))
-  await Promise.any(promises)
-
-  connected()
-  invokeFindServiceNode()
-
-  const info = await client_?.get_node_info()
-  console.log(info)
-  toggleIcon()
-
+  await statusWatcher()
+  toggleIcon('active')
   return {
     clients,
     address: client_!.address,
   }
 })
 
+// connect node seed
+onMessage("connect-node", async ({ data }) => {
+  if (!currentClient) return
+  let client_ = currentClient;
+  try {
+    const promises = data.url.split(';').map(async (url: string) => {
+
+      return await client_?.connect_peer_via_http(url)
+
+    })
+    await Promise.any(promises)
+    connected()
+  } catch (e) {
+    console.error('failed on connect seed node: ', data)
+  }
+  invokeFindServiceNode()
+
+})
 /**
  * inpage methods
  */
@@ -191,7 +217,6 @@ onMessage('init-background', async ({ data }) => {
 /**
  * extension method
  */
-
 async function connectRings(query: Record<string, string> = {}) {
   return await handlerNotification('connect', query)
 }
@@ -218,24 +243,6 @@ async function sendRingsMessage(to: string, message: string) {
 async function connectByAddress(address: string) {
   if (currentClient && currentAccount) {
     return await currentClient.connect_with_address(address, getAddressWithType(currentAccount).type)
-  }
-}
-
-async function createOffer(address: string) {
-  if (currentClient) {
-    return (await currentClient.create_offer(address)) as string
-  }
-}
-
-async function answerOffer(offer: string) {
-  if (currentClient && offer) {
-    return await currentClient.answer_offer(offer)
-  }
-}
-
-async function acceptAnswer(transportId: any, answer: any) {
-  if (currentClient && transportId) {
-    return await currentClient.accept_answer(answer)
   }
 }
 
@@ -338,6 +345,8 @@ async function destroyClient() {
         1
       )
     currentClient = null
+    clearInterval(watcherId)
+    watcherId = null;
   }
 
   if (currentAccount) {
@@ -347,7 +356,26 @@ async function destroyClient() {
   serviceNodes.clear()
 
   disconnected()
+  console.log("successfully destory client")
 }
+
+async function statusWatcher() {
+  let interval = 1000
+  watcherId = setInterval(() => {
+    if (!currentClient) return
+    let client_ = currentClient;
+    (async () => {
+      const status = await client_?.request('nodeInfo', []);
+      if (status !== undefined) {
+        try {
+          await sendMessage("node-status-change", status!, "popup");
+        } catch (e) {
+        }
+      }
+    })()
+  }, interval);
+}
+
 
 async function createRingsNodeClient({
   turnUrl,
@@ -359,6 +387,7 @@ async function createRingsNodeClient({
   nodeUrl: string
 }) {
   try {
+    console.log(turnUrl, nodeUrl, account)
     if (currentClient && currentAccount === account) {
       return
     }
@@ -367,11 +396,12 @@ async function createRingsNodeClient({
       try {
         wasmInit = await init(browser.runtime.getURL('dist/background/rings_node_bg.wasm'))
         initSuccess()
+        debug(false)
+        console.log("Successfuly init WASM module")
       } catch (error) {
         initFailed()
       }
     }
-
     connecting()
 
     let signer = async (proof: string): Promise<Uint8Array> => {
@@ -399,11 +429,11 @@ async function createRingsNodeClient({
       // callback
       callback
     )
+    console.log("successfully created client")
     currentAccount = account
     currentClient = client_
     clients.push(client_)
     return client_
-
   } catch (e) {
     console.error(e)
   }

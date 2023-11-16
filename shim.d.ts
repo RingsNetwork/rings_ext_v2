@@ -17,8 +17,9 @@ declare module 'webext-bridge' {
         clients: any[]
       }
     >
+    'connect-node': ProtocolWithReturn<{ url: string }, any>
     'sign-message': ProtocolWithReturn<{ auth: string }, { signed: string }>
-    'check-status': ProtocolWithReturn<
+    'get-client': ProtocolWithReturn<
       any,
       {
         clients: any[]
@@ -37,6 +38,7 @@ declare module 'webext-bridge' {
         requestId: number
       } & Record<string, any>
     >
+    'node-status-change': ProtocolWithReturn<Record<string, any>, any>
     'destroy-client': any
     'get-peers': ProtocolWithReturn<any, any>
     getWindowInfo: ProtocolWithReturn<
