@@ -201,7 +201,7 @@ onMessage("connect-node", async ({ data }) => {
     await Promise.any(promises)
     connected()
   } catch (e) {
-    console.error(e)
+    console.error('failed on connect seed node: ', data)
   }
   invokeFindServiceNode()
 

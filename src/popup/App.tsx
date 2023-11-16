@@ -99,7 +99,7 @@ export function App() {
       console.log('connecting seed node')
       await sendMessage('connect-node', { url: urls.nodeUrl })
     } catch (e) {
-      console.error(e)
+      console.error('failed on connect seed node: ', urls.nodeUrl)
       throw Error(JSON.stringify(e))
       setLoading(false)
     } finally {
