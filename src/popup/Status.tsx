@@ -7,6 +7,7 @@ import CircProgressBar from './CircProgressBar'
 import { NetworkSwitcher } from './components/SwitchNetworks'
 
 export const Status = ({
+  status,
   urls,
   setUrls,
   clients,
@@ -15,6 +16,7 @@ export const Status = ({
   destroyClient,
   ringsBtnCallback,
 }: {
+  status: Record<any, any>
   urls: {
     turnUrl: string
     nodeUrl: string
@@ -79,51 +81,51 @@ export const Status = ({
       </div>
     )
   }
-
   const ConfigFields = () => {
     return (
-      <div className="relative p-2.5">
-        <div className="flex justify-between items-center">
-          <span className="w-100px text-xs scale-90 origin-left">ICE URL:</span>
-          <input
-            className="h-7 px-1 flex-1 fake-border outline-none scale-90 origin-right disabled:opacity-60"
-            value={urls.turnUrl}
-            onInput={(e) => {
-              setUrls({
-                turnUrl: (e.target as HTMLInputElement).value,
-              })
-            }}
-            disabled={clients.length > 0}
-          />
+      <div className="relative p-4 bg-white shadow">
+        <div className="text-center text-lg font-bold mb-4">
+          <span>Configure</span>
         </div>
-        <div className="bg-gray-100 text-xs px-1 py-1 leading-3 text-slate-600">
-          ICE Url is a URL list for ICE protocol, this can be TURN or STUN URL
+        <div className="mb-4">
+          <div className="mb-2">
+            <div className="font-semibold">
+              <label className="w-full text-sm block">ICE URL:</label>
+            </div>
+            <input
+              className="w-full h-8 px-2 mt-1 border border-gray-300 rounded outline-none disabled:opacity-60"
+              value={urls.turnUrl}
+              onInput={(e) => {
+                setUrls({
+                  turnUrl: (e.target as HTMLInputElement).value,
+                })
+              }}
+              disabled={clients.length > 0}
+            />
+          </div>
+          <div className="bg-gray-100 text-sm px-2 py-2 rounded text-slate-600">
+            ICE Url is a URL list for ICE protocol, this can be TURN or STUN URL
+          </div>
         </div>
-        <div className="mt-2.5 flex justify-between items-center">
-          <span className="w-100px text-xs scale-90 origin-left">SEEDS URL:</span>
-          <input
-            className="h-7 px-1 flex-1 fake-border outline-none scale-90 origin-right disabled:opacity-60"
-            value={urls.nodeUrl}
-            onInput={(e) => {
-              setUrls({
-                nodeUrl: (e.target as HTMLInputElement).value,
-              })
-            }}
-            disabled={clients.length > 0}
-          />
-        </div>
-        <div className="bg-gray-100 text-xs px-1 py-1 leading-3 text-slate-600">
-          Seeds url is a URL list, which are working as entrypoint of rings network
-        </div>
-        <div className="p-2.5 flex items-center justify-between text-xs border-solid border-t border-gray-300">
-          <span
-            onClick={() => {
-              setCurrentTab('main')
-            }}
-            className="cursor-pointer scale-80 origin-left transition-all hover:translate-x-.25 underline underline-current p-2 text-l"
-          >
-            Back
-          </span>
+        <div className="mt-4">
+          <div className="mb-2">
+            <div className="font-semibold">
+              <label className="w-full text-sm block">SEEDS URL:</label>
+            </div>
+            <input
+              className="w-full h-8 px-2 mt-1 border border-gray-300 rounded outline-none disabled:opacity-60"
+              value={urls.nodeUrl}
+              onInput={(e) => {
+                setUrls({
+                  nodeUrl: (e.target as HTMLInputElement).value,
+                })
+              }}
+              disabled={clients.length > 0}
+            />
+          </div>
+          <div className="bg-gray-100 text-sm px-2 py-2 rounded text-slate-600">
+            Seeds url is a URL list, which are working as entrypoint of rings network
+          </div>
         </div>
       </div>
     )
@@ -256,20 +258,91 @@ export const Status = ({
 
   const TabBar = () => {
     return (
-      <div className="w-full flex justify-center items-end bg-white p-4 shadow-md">
-        <button className="text-xl flex-grow">🌐</button>
-        <button className="text-3xl text-red-500 mx-4 flex-grow">⭕</button>
-        <button className="text-3xl flex-grow">⚙</button>
+      <div className="fixed bottom-0 w-full flex justify-center items-end bg-white p-4 shadow-md border-solid border-gray-200 border-t">
+        <button
+          className="text-xl flex-grow"
+          onClick={() => {
+            setCurrentTab('status')
+          }}
+        >
+          🌐
+        </button>
+        <button
+          className="text-3xl text-red-500 mx-4 flex-grow"
+          onClick={() => {
+            setCurrentTab('main')
+          }}
+        >
+          ⭕
+        </button>
+        <button
+          className="text-3xl flex-grow"
+          onClick={() => {
+            setCurrentTab('config')
+          }}
+        >
+          ⚙
+        </button>
+      </div>
+    )
+  }
+  const ConnectStatus = () => {
+    return (
+      <div className="p-4 relative">
+        <div className="text-center text-lg font-bold mb-4">
+          <span>Status</span>
+        </div>
+        <div className="mb-4">
+          <div className="font-semibold mb-2">
+            <label>Connected Peers:</label>
+          </div>
+          {status.swarm?.connections?.map((c: Record<any, any>, index: number) => (
+            <div key={index} className="mb-1">
+              <span className="mr-2">{shorten(c.did, 15)}</span>
+              <span>{c.state}</span>
+            </div>
+          ))}
+        </div>
+        <div>
+          <div className="font-semibold mb-2">
+            <label>DHT Status:</label>
+          </div>
+          <div className="mb-1">
+            <label>DID: </label>
+            <span>{shorten(status.dht?.did, 20)}</span>
+          </div>
+          <div className="mt-4">
+            <label>Successors: </label>
+            {status.swarm?.dht?.successors?.map((c: string, index: number) => (
+              <div key={index} className="mb-1">
+                <span>{shorten(c, 25)}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4">
+            <label>Predecessor: </label>
+            <div className="mb-1">
+              <span>{shorten(status.swarm?.dht?.predecessor, 25)}</span>
+            </div>
+          </div>
+          <div className="font-semibold mt-2">
+            <label>Rings Version:</label>
+          </div>
+          <div className="mb-1">
+            <span className="mr-2">{status.version}</span>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="w-358px h-400px flex-col-center font-pixel antialiased">
+    <div className="w-358px h-550px flex-col-center font-pixel antialiased">
       <div className="w-full h-full">
         <Nav />
         {currentTab === 'main' && <RingsBtn />}
         {currentTab === 'config' && <ConfigFields />}
+        {currentTab === 'status' && <ConnectStatus />}
         <TabBar />
       </div>
       {/* <!-- modal --> */}

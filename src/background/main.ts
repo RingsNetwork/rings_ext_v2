@@ -360,18 +360,16 @@ async function destroyClient() {
 }
 
 async function statusWatcher() {
-  let interval = 500
-
-  let lastStatus: object | undefined;
+  let interval = 1000
   watcherId = setInterval(() => {
     if (!currentClient) return
     let client_ = currentClient;
     (async () => {
-      const newValue = await client_?.request('nodeInfo', []);
-      if (lastStatus === undefined || JSON.stringify(newValue) !== JSON.stringify(lastStatus)) {
-        if (newValue !== undefined) {
-          lastStatus = newValue;
-          await sendMessage("node-status-change", lastStatus!, "popup");
+      const status = await client_?.request('nodeInfo', []);
+      if (status !== undefined) {
+        try {
+          await sendMessage("node-status-change", status!, "popup");
+        } catch (e) {
         }
       }
     })()

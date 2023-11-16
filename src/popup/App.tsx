@@ -34,8 +34,7 @@ export function App() {
     })
 
     onMessage('node-status-change', async ({ data }) => {
-      setRingsStatus(data.result?.swarm)
-      console.log(data.result?.swarm)
+      setRingsStatus(data.result)
     })
   }, [ringsStatus])
 
@@ -133,6 +132,7 @@ export function App() {
             path="/*"
             element={
               <Status
+                status={ringsStatus}
                 urls={urls}
                 setUrls={setUrls}
                 clients={clients}
