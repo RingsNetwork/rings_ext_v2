@@ -15,13 +15,12 @@ export function App() {
   const { address } = useAccount()
   const { connectors, connectAsync } = useConnect()
   const [clients, setClients] = useState<any[]>([])
-  const [ringsStatus, setRingsStatus] = useState<any[]>([])
+  const [ringsStatus, setRingsStatus] = useState<Record<string, any>>({})
 
   useEffect(() => {
     // get client from background
     ;(async () => {
       const data = await sendMessage('get-client', null)
-      console.log(data.clients)
       setClients(data.clients)
     })()
 
@@ -37,8 +36,9 @@ export function App() {
 
     onMessage('node-status-change', async ({ data }) => {
       if (JSON.stringify(data.result) !== JSON.stringify(ringsStatus)) {
-        setRingsStatus(data.result)
-        console.log('update status')
+        if (data.result) {
+          setRingsStatus(data.result)
+        }
       }
     })
   }, [ringsStatus])
@@ -124,9 +124,15 @@ export function App() {
     setLoading(true)
     setClients([])
     await sendMessage('destroy-client', null)
-    setRingsStatus([])
+    console.log('set', ringsStatus.version)
+    if (ringsStatus.version) {
+      new_status = { version: ringsStatus.version }
+    } else {
+      new_status = {}
+    }
+    setRingsStatus(ringsStatus)
     setLoading(false)
-  }, [clients])
+  }, [clients, ringsStatus])
 
   return new URLSearchParams(location.search).get('notification') ? (
     <NotificationPage connectHandler={connectHandler} loading={loading} />
