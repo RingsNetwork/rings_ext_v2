@@ -3,11 +3,11 @@ import React from 'react'
 import { useAccount, useConnect, useDisconnect, useNetwork } from 'wagmi'
 import browser from 'webextension-polyfill'
 
+import { RingsContext } from './App'
 import CircProgressBar from './CircProgressBar'
 import { NetworkSwitcher } from './components/SwitchNetworks'
 
 export const Status = ({
-  status,
   urls,
   setUrls,
   clients,
@@ -16,7 +16,6 @@ export const Status = ({
   destroyClient,
   ringsBtnCallback,
 }: {
-  status: Record<any, any>
   urls: {
     turnUrl: string
     nodeUrl: string
@@ -45,7 +44,7 @@ export const Status = ({
   }
 
   // return status of connected node
-  const connectedNodeStatus = () => {
+  const connectedNodeStatus = (status: Record<string, any>) => {
     if (!status) return 'offline'
     if (!status.swarm) return 'offline'
     if (status.swarm?.connections == 0) return 'offline'
@@ -159,7 +158,9 @@ export const Status = ({
     }
   )
 
-  const PeersStatusModal = ({ peers }: { peers: any[] }) => {
+  const PeersStatusModal = React.memo(() => {
+    const status = useContext(RingsContext)
+    const peers = status.swarm?.connections ?? []
     return (
       <div
         ref={contentRef}
@@ -168,7 +169,9 @@ export const Status = ({
         <div className="p-2.5 flex items-center justify-between text-xs border-solid border-b border-gray-300">
           <span className={`scale-80 origin-left`}>
             Network Status:{' '}
-            <span className={`${clients.length ? 'text-#15CD96' : 'text-#fb7185 '}`}>{connectedNodeStatus()}</span>
+            <span className={`${clients.length ? 'text-#15CD96' : 'text-#fb7185 '}`}>
+              {connectedNodeStatus(status)}
+            </span>
           </span>
           <span
             className="flex-1 text-right scale-80 origin-right cursor-pointer transition-all hover:translate-x-.25 underline underline-current"
@@ -244,7 +247,7 @@ export const Status = ({
         </div>
       </div>
     )
-  }
+  })
 
   const Nav = () => {
     return (
@@ -316,7 +319,8 @@ export const Status = ({
       </div>
     )
   }
-  const ConnectStatus = ({ status }: { status: Record<any, any> }) => {
+  const ConnectStatus = () => {
+    const status = useContext(RingsContext)
     return (
       <div className="p-4 relative">
         <div className="text-center text-lg font-bold mb-4">
@@ -372,7 +376,7 @@ export const Status = ({
         <Nav />
         {currentTab === 'main' && <RingsBtn clients={clients} ringsBtnCallback={ringsBtnCallback} />}
         {currentTab === 'config' && <ConfigFields canChange={clients.length > 0 ? false : true} configUrls={urls} />}
-        {currentTab === 'status' && <ConnectStatus status={status} />}
+        {currentTab === 'status' && <ConnectStatus />}
         <TabBar />
       </div>
       {/* <!-- modal --> */}
@@ -382,7 +386,7 @@ export const Status = ({
           !contentRef.current?.contains(e.target as Node) && setShowModal(false)
         }}
       >
-        <PeersStatusModal peers={status.swarm?.connections ?? []} />
+        <PeersStatusModal />
       </div>
     </div>
   )

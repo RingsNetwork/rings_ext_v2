@@ -1,3 +1,4 @@
+import React from 'react'
 import { useAccount, useConnect } from 'wagmi'
 import { signMessage } from 'wagmi/actions'
 import { onMessage, sendMessage } from 'webext-bridge/popup'
@@ -7,6 +8,8 @@ import { getStorage } from '~/utils/storage'
 import { NotificationPage } from './Notification'
 import { Status } from './Status'
 import { useConfig } from './store'
+
+const RingsContext = React.createContext<Record<string, any>>({})
 
 export function App() {
   const { address } = useAccount()
@@ -128,22 +131,25 @@ export function App() {
   return new URLSearchParams(location.search).get('notification') ? (
     <NotificationPage connectHandler={connectHandler} loading={loading} />
   ) : (
-    <Status
-      status={ringsStatus}
-      urls={urls}
-      setUrls={setUrls}
-      clients={clients}
-      connectHandler={connectHandler}
-      loading={loading}
-      destroyClient={destroyClient}
-      ringsBtnCallback={async () => {
-        console.log('click', clients.length)
-        if (!clients.length) {
-          connectSeed()
-        } else {
-          destroyClient()
-        }
-      }}
-    />
+    <RingsContext.Provider value={ringsStatus}>
+      <Status
+        urls={urls}
+        setUrls={setUrls}
+        clients={clients}
+        connectHandler={connectHandler}
+        loading={loading}
+        destroyClient={destroyClient}
+        ringsBtnCallback={async () => {
+          console.log('click', clients.length)
+          if (!clients.length) {
+            connectSeed()
+          } else {
+            destroyClient()
+          }
+        }}
+      />
+    </RingsContext.Provider>
   )
 }
+
+export { RingsContext }
