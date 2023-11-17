@@ -1,4 +1,3 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import { useAccount, useConnect } from 'wagmi'
 import { signMessage } from 'wagmi/actions'
 import { onMessage, sendMessage } from 'webext-bridge/popup'
@@ -34,7 +33,10 @@ export function App() {
     })
 
     onMessage('node-status-change', async ({ data }) => {
-      setRingsStatus(data.result)
+      if (JSON.stringify(data.result) !== JSON.stringify(ringsStatus)) {
+        setRingsStatus(data.result)
+        console.log('update status')
+      }
     })
   }, [ringsStatus])
 
@@ -126,33 +128,22 @@ export function App() {
   return new URLSearchParams(location.search).get('notification') ? (
     <NotificationPage connectHandler={connectHandler} loading={loading} />
   ) : (
-    <Router>
-      <div>
-        <Routes>
-          <Route
-            path="/*"
-            element={
-              <Status
-                status={ringsStatus}
-                urls={urls}
-                setUrls={setUrls}
-                clients={clients}
-                connectHandler={connectHandler}
-                loading={loading}
-                destroyClient={destroyClient}
-                ringsBtnCallback={async () => {
-                  console.log('click', clients.length)
-                  if (!clients.length) {
-                    connectSeed()
-                  } else {
-                    destroyClient()
-                  }
-                }}
-              />
-            }
-          />
-        </Routes>
-      </div>
-    </Router>
+    <Status
+      status={ringsStatus}
+      urls={urls}
+      setUrls={setUrls}
+      clients={clients}
+      connectHandler={connectHandler}
+      loading={loading}
+      destroyClient={destroyClient}
+      ringsBtnCallback={async () => {
+        console.log('click', clients.length)
+        if (!clients.length) {
+          connectSeed()
+        } else {
+          destroyClient()
+        }
+      }}
+    />
   )
 }
