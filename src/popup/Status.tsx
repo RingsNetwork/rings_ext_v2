@@ -6,6 +6,7 @@ import browser from 'webextension-polyfill'
 import { RingsContext } from './App'
 import CircProgressBar from './CircProgressBar'
 import { NetworkSwitcher } from './components/SwitchNetworks'
+import { load } from './loarder'
 
 export const Status = ({
   urls,
@@ -85,13 +86,15 @@ export const Status = ({
         nodeUrl: string
       }
     }) => {
+      const [updateInputValue, setUpdateInputValue] = useState('')
+
       console.log('re render config')
       return (
         <div className="relative p-4 bg-white shadow">
           <div className="text-center text-lg font-bold mb-4">
             <span>Configure</span>
           </div>
-          <div className="overflow-auto max-h-100">
+          <div className="overflow-auto max-h-93">
             <div className="mb-4">
               <div className="mb-2">
                 <div className="font-semibold">
@@ -137,8 +140,19 @@ export const Status = ({
                 <div className="font-semibold">
                   <label className="w-full text-sm block">Update Url:</label>
                 </div>
-                <input className="w-full h-8 px-2 mt-1 border border-gray-300 rounded outline-none disabled:opacity-60" />
-                <button>Update</button>
+                <input
+                  className="w-full h-8 px-2 mt-1 border border-gray-300 rounded outline-none disabled:opacity-60"
+                  onInput={(e) => {
+                    setUpdateInputValue((e.target as HTMLInputElement).value)
+                  }}
+                />
+                <button
+                  onClick={(e) => {
+                    load(updateInputValue)
+                  }}
+                >
+                  Update
+                </button>
               </div>
               <div className="bg-gray-100 text-sm px-2 py-2 rounded text-slate-600">
                 You can find the update url on github

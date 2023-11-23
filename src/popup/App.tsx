@@ -125,12 +125,11 @@ export function App() {
     setClients([])
     await sendMessage('destroy-client', null)
     console.log('set', ringsStatus.version)
+    let newStatus_ = {}
     if (ringsStatus.version) {
-      new_status = { version: ringsStatus.version }
-    } else {
-      new_status = {}
+      newStatus_ = { version: ringsStatus.version }
     }
-    setRingsStatus(ringsStatus)
+    setRingsStatus(newStatus_)
     setLoading(false)
   }, [clients, ringsStatus])
 
