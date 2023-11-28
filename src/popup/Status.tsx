@@ -6,7 +6,7 @@ import browser from 'webextension-polyfill'
 import { RingsContext } from './App'
 import CircProgressBar from './CircProgressBar'
 import { NetworkSwitcher } from './components/SwitchNetworks'
-import { load } from './loarder'
+import { load } from './loader'
 
 export const Status = ({
   urls,
