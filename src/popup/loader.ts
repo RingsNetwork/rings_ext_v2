@@ -117,10 +117,12 @@ async function findLatestSrc(moduleName: string): Promise<string | undefined> {
   }
 }
 
-async function _customRequire(storageModule: string, moduleName: string): Promise<any> {
-  const moduleCode = await findLatestSrc(storageModule)
+// This function only for load js file, NOT ts or tsx
+async function _customRequire(moduleName: string): Promise<any> {
+  const moduleCode = await findLatestSrc(moduleName)
 
   if (moduleCode) {
+    console.log('loading stored module')
     try {
       const module = { exports: {} }
       const executeModule = new Function('module', moduleCode)
@@ -131,7 +133,8 @@ async function _customRequire(storageModule: string, moduleName: string): Promis
     }
   } else {
     try {
-      const module = await import(moduleName)
+      console.log('loading local module')
+      const module = await import(/* @vite-ignore */ moduleName + '.js')
       return module
     } catch (e) {
       throw new Error(`Error loading module ${moduleName}: e`)
@@ -139,4 +142,4 @@ async function _customRequire(storageModule: string, moduleName: string): Promis
   }
 }
 export const load = downloadAndStoreZip
-export const customRequire = _customRequire
+export const require = _customRequire
