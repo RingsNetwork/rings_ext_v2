@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+import React from 'react'
 import { useAccount, useConnect } from 'wagmi'
 import { signMessage } from 'wagmi/actions'
 import { onMessage, sendMessage } from 'webext-bridge/popup'
@@ -9,17 +9,18 @@ import { NotificationPage } from './Notification'
 import { Status } from './Status'
 import { useConfig } from './store'
 
+const RingsContext = React.createContext<Record<string, any>>({})
+
 export function App() {
   const { address } = useAccount()
   const { connectors, connectAsync } = useConnect()
   const [clients, setClients] = useState<any[]>([])
-  const [ringsStatus, setRingsStatus] = useState<any[]>([])
+  const [ringsStatus, setRingsStatus] = useState<Record<string, any>>({})
 
   useEffect(() => {
     // get client from background
     ;(async () => {
       const data = await sendMessage('get-client', null)
-      console.log(data.clients)
       setClients(data.clients)
     })()
 
@@ -34,7 +35,11 @@ export function App() {
     })
 
     onMessage('node-status-change', async ({ data }) => {
-      setRingsStatus(data.result)
+      if (JSON.stringify(data.result) !== JSON.stringify(ringsStatus)) {
+        if (data.result) {
+          setRingsStatus(data.result)
+        }
+      }
     })
   }, [ringsStatus])
 
@@ -119,40 +124,37 @@ export function App() {
     setLoading(true)
     setClients([])
     await sendMessage('destroy-client', null)
-    setRingsStatus([])
+    console.log('set', ringsStatus.version)
+    let newStatus_ = {}
+    if (ringsStatus.version) {
+      newStatus_ = { version: ringsStatus.version }
+    }
+    setRingsStatus(newStatus_)
     setLoading(false)
-  }, [clients])
+  }, [clients, ringsStatus])
 
   return new URLSearchParams(location.search).get('notification') ? (
     <NotificationPage connectHandler={connectHandler} loading={loading} />
   ) : (
-    <Router>
-      <div>
-        <Routes>
-          <Route
-            path="/*"
-            element={
-              <Status
-                status={ringsStatus}
-                urls={urls}
-                setUrls={setUrls}
-                clients={clients}
-                connectHandler={connectHandler}
-                loading={loading}
-                destroyClient={destroyClient}
-                ringsBtnCallback={async () => {
-                  console.log('click', clients.length)
-                  if (!clients.length) {
-                    connectSeed()
-                  } else {
-                    destroyClient()
-                  }
-                }}
-              />
-            }
-          />
-        </Routes>
-      </div>
-    </Router>
+    <RingsContext.Provider value={ringsStatus}>
+      <Status
+        urls={urls}
+        setUrls={setUrls}
+        clients={clients}
+        connectHandler={connectHandler}
+        loading={loading}
+        destroyClient={destroyClient}
+        ringsBtnCallback={async () => {
+          console.log('click', clients.length)
+          if (!clients.length) {
+            connectSeed()
+          } else {
+            destroyClient()
+          }
+        }}
+      />
+    </RingsContext.Provider>
   )
 }
+
+export { RingsContext }

@@ -92,6 +92,11 @@ export default defineConfig(({ command }) => {
           options: r('src/options/index.html'),
           popup: r('src/popup/index.html'),
         },
+	output: {
+          entryFileNames: `popup/[name].js`,
+          chunkFileNames: `popup/[name].js`,
+          assetFileNames: `popup/[name].[ext]`
+	}
       },
     },
     plugins: [

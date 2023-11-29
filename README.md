@@ -58,6 +58,23 @@ pnpm start:firefox
 
 > While Vite handles HMR automatically in the most of the case, [Extensions Reloader](https://chrome.google.com/webstore/detail/fimgfedafeadlieiabdeeaodndnlbhid) is still recommanded for cleaner hard reloading.
 
+
+#### Developing with Rings Node
+
+In released version, dependencity of `rings-node` is included via released `tgz` file, such as:
+
+```json
+"@ringsnetwork/rings-node": "https://github.com/RingsNetwork/rings-node/releases/download/v0.3.5/rings-v0.3.5-wasm32-unknown-unknown.tgz",
+```
+
+if you wanna modifiy node's implementation at same time, you can modifiy rings-node dependencies in `package.json` to local git path, like:
+
+```json
+"@ringsnetwork/rings-node": "git+file:../rings-node#master",
+```
+
+Note: this local git syntax is only supported by yarn.
+
 ### Build
 
 To build the extension, run

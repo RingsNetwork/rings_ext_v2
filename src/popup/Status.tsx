@@ -1,14 +1,16 @@
 import { shorten } from '@did-network/dapp-sdk'
+import React from 'react'
+import { FiCircle, FiSettings } from 'react-icons/fi'
+import { LuNetwork } from 'react-icons/lu'
 import { useAccount, useConnect, useDisconnect, useNetwork } from 'wagmi'
-import { sendMessage } from 'webext-bridge/popup'
 import browser from 'webextension-polyfill'
 
-import type { Peer } from '../background/utils'
+import { RingsContext } from './App'
 import CircProgressBar from './CircProgressBar'
 import { NetworkSwitcher } from './components/SwitchNetworks'
+import { load } from './loader'
 
 export const Status = ({
-  status,
   urls,
   setUrls,
   clients,
@@ -17,7 +19,6 @@ export const Status = ({
   destroyClient,
   ringsBtnCallback,
 }: {
-  status: Record<any, any>
   urls: {
     turnUrl: string
     nodeUrl: string
@@ -39,35 +40,14 @@ export const Status = ({
 
   const [switcherShow, setSwitcherShow] = useState(false)
 
-  const [peers, setPeers] = useState<Peer[]>([])
-  const [serviceNodes, setServiceNodes] = useState<string[]>([])
-
   const forceReset = async () => {
     await browser.storage.local.clear()
     await browser.storage.sync.clear()
     await browser.runtime.reload()
   }
 
-  const getPeers = useCallback(async () => {
-    const res = await sendMessage('get-peers', null)
-
-    setPeers(res[0] ?? [])
-    setServiceNodes(res[1] ?? [])
-  }, [])
-
-  useEffect(() => {
-    getPeers()
-    const timer = window.setInterval(() => {
-      getPeers()
-    }, 5000)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [getPeers])
-
   // return status of connected node
-  const connectedNodeStatus = () => {
+  const connectedNodeStatus = (status: Record<string, any>) => {
     if (!status) return 'offline'
     if (!status.swarm) return 'offline'
     if (status.swarm?.connections == 0) return 'offline'
@@ -81,7 +61,7 @@ export const Status = ({
       <div className={className}>
         {connectors.map((connector) => (
           <button
-            className="px-4 h-full flex-center text-xs text-black  active:bg-#2E2E3A active:bg-opacity-5"
+            className="px-4 h-full flex-center text-xs text-black bg-#EA906C active:bg-opacity-5"
             disabled={!connector.ready}
             key={connector.id}
             onClick={(e) => {
@@ -97,66 +77,117 @@ export const Status = ({
       </div>
     )
   }
-  const ConfigFields = () => {
-    return (
-      <div className="relative p-4 bg-white shadow">
-        <div className="text-center text-lg font-bold mb-4">
-          <span>Configure</span>
-        </div>
-        <div className="mb-4">
-          <div className="mb-2">
-            <div className="font-semibold">
-              <label className="w-full text-sm block">ICE URL:</label>
-            </div>
-            <input
-              className="w-full h-8 px-2 mt-1 border border-gray-300 rounded outline-none disabled:opacity-60"
-              value={urls.turnUrl}
-              onInput={(e) => {
-                setUrls({
-                  turnUrl: (e.target as HTMLInputElement).value,
-                })
-              }}
-              disabled={clients.length > 0}
-            />
-          </div>
-          <div className="bg-gray-100 text-sm px-2 py-2 rounded text-slate-600">
-            ICE Url is a URL list for ICE protocol, this can be TURN or STUN URL
-          </div>
-        </div>
-        <div className="mt-4">
-          <div className="mb-2">
-            <div className="font-semibold">
-              <label className="w-full text-sm block">SEEDS URL:</label>
-            </div>
-            <input
-              className="w-full h-8 px-2 mt-1 border border-gray-300 rounded outline-none disabled:opacity-60"
-              value={urls.nodeUrl}
-              onInput={(e) => {
-                setUrls({
-                  nodeUrl: (e.target as HTMLInputElement).value,
-                })
-              }}
-              disabled={clients.length > 0}
-            />
-          </div>
-          <div className="bg-gray-100 text-sm px-2 py-2 rounded text-slate-600">
-            Seeds url is a URL list, which are working as entrypoint of rings network
-          </div>
-        </div>
-      </div>
-    )
-  }
+  const ConfigFields = React.memo(
+    ({
+      canChange,
+      configUrls,
+    }: {
+      canChange: boolean
+      configUrls: {
+        turnUrl: string
+        nodeUrl: string
+      }
+    }) => {
+      const [updateInputValue, setUpdateInputValue] = useState('')
 
-  const PeersStatusModal = () => {
+      console.log('re render config')
+      return (
+        <div className="relative p-4 bg-white shadow">
+          <div className="text-center text-lg font-bold mb-4">
+            <span>Configure</span>
+          </div>
+          <div className="overflow-auto max-h-93">
+            <div className="mb-4">
+              <div className="mb-2">
+                <div className="font-semibold">
+                  <label className="w-full text-sm block">ICE URL:</label>
+                </div>
+                <input
+                  className="w-full h-8 px-2 mt-1 border border-gray-300 rounded outline-none disabled:opacity-60"
+                  value={configUrls.turnUrl}
+                  onInput={(e) => {
+                    setUrls({
+                      turnUrl: (e.target as HTMLInputElement).value,
+                    })
+                  }}
+                  disabled={!canChange}
+                />
+              </div>
+              <div className="bg-gray-100 text-sm px-2 py-2 rounded text-slate-600">
+                ICE Url is a URL list for ICE protocol, this can be TURN or STUN URL
+              </div>
+            </div>
+            <div className="mt-4">
+              <div className="mb-2">
+                <div className="font-semibold">
+                  <label className="w-full text-sm block">SEEDS URL:</label>
+                </div>
+                <input
+                  className="w-full h-8 px-2 mt-1 border border-gray-300 rounded outline-none disabled:opacity-60"
+                  value={configUrls.nodeUrl}
+                  onInput={(e) => {
+                    setUrls({
+                      nodeUrl: (e.target as HTMLInputElement).value,
+                    })
+                  }}
+                  disabled={!canChange}
+                />
+              </div>
+              <div className="bg-gray-100 text-sm px-2 py-2 rounded text-slate-600">
+                Seeds url is a URL list, which are working as entrypoint of rings network
+              </div>
+            </div>
+            <div className="mt-4">
+              <div className="mb-2">
+                <div className="font-semibold">
+                  <label className="w-full text-sm block">Update Url:</label>
+                </div>
+                <input
+                  className="w-full h-8 px-2 mt-1 border border-gray-300 rounded outline-none disabled:opacity-60"
+                  onInput={(e) => {
+                    setUpdateInputValue((e.target as HTMLInputElement).value)
+                  }}
+                />
+                <button
+                  onClick={(e) => {
+                    load(updateInputValue)
+                  }}
+                >
+                  Update
+                </button>
+              </div>
+              <div className="bg-gray-100 text-sm px-2 py-2 rounded text-slate-600">
+                You can find the update url on github
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    (prevProps, nextProps) => {
+      let shouldRerender =
+        prevProps.canChange === nextProps.canChange &&
+        prevProps.configUrls.turnUrl === nextProps.configUrls.turnUrl &&
+        prevProps.configUrls.nodeUrl === nextProps.configUrls.nodeUrl
+      console.log('shoud rerender?', shouldRerender)
+      return shouldRerender
+    }
+  )
+
+  const PeersStatusModal = React.memo(() => {
+    const status = useContext(RingsContext)
+    const peers = status.swarm?.connections ?? []
     return (
       <div
         ref={contentRef}
-        className={`!absolute top-13 right-2.5 flex flex-col items-stretch w-300px h-300px -translate-y-1.5 bg-white border-angle fake-border overflow-hidden`}
+        className={`!absolute top-13 right-2.5 flex flex-col items-stretch w-300px h-300px -translate-y-1.5 bg-#EEE2DE border-angle fake-border overflow-hidden`}
       >
         <div className="p-2.5 flex items-center justify-between text-xs border-solid border-b border-gray-300">
           <span className={`scale-80 origin-left`}>
             Network Status:{' '}
-            <span className={`${clients.length ? 'text-#15CD96' : 'text-#fb7185 '}`}>{connectedNodeStatus()}</span>
+            <span className={`${clients.length ? 'text-#15CD96' : 'text-#fb7185 '}`}>
+              {connectedNodeStatus(status)}
+            </span>
           </span>
           <span
             className="flex-1 text-right scale-80 origin-right cursor-pointer transition-all hover:translate-x-.25 underline underline-current"
@@ -174,10 +205,6 @@ export const Status = ({
           <div className="p-2.5 pt-0 flex items-center justify-between text-xs first:pt-2.5">
             <span className="scale-80 origin-left">Peers:</span>
             <span className="flex-1 text-right scale-80 origin-right">{peers.length}</span>
-          </div>
-          <div className="p-2.5 pt-0 flex items-center justify-between text-xs">
-            <span className="scale-80 origin-left">ServiceNodes:</span>
-            <span className="flex-1 text-right scale-80 origin-right">{serviceNodes.length}</span>
           </div>
         </div>
         <div className="relative p-2.5 flex items-center justify-between text-xs border-solid border-t border-gray-300">
@@ -236,11 +263,11 @@ export const Status = ({
         </div>
       </div>
     )
-  }
+  })
 
   const Nav = () => {
     return (
-      <nav className="relative p-2.5 flex justify-between items-center border-solid border-b border-gray-300">
+      <nav className="relative p-2.5 flex justify-between items-center bg-[#EA906C] text-#B31312">
         <div className="flex-1 text-xs">Rings Network</div>
         <PKIConnectStatus className={'h-7 border-angle fake-border bg-white'} />
         <div className="relative ml-2.5 w-7 h-7 flex-col-center border-angle">
@@ -262,53 +289,58 @@ export const Status = ({
     )
   }
 
-  const RingsBtn = ({ clients }: { clients: any[] }) => {
-    return (
-      <div>
-        <CircProgressBar
-          labels={[]}
-          index={clients.length}
-          lineLength={50}
-          segmentProportion={0.3} // For example, 60% of the line is the first segment
-          onClick={ringsBtnCallback}
-        />
-      </div>
-    )
-  }
+  const RingsBtn = React.memo(
+    ({ clients, ringsBtnCallback }: { clients: any[]; ringsBtnCallback: () => Promise<void> }) => {
+      return (
+        <div>
+          <CircProgressBar
+            labels={[]}
+            index={clients.length}
+            lineLength={50}
+            segmentProportion={0.3} // For example, 60% of the line is the first segment
+            onClick={ringsBtnCallback}
+          />
+        </div>
+      )
+    }
+  )
 
   const TabBar = () => {
     return (
-      <div className="fixed bottom-0 w-full flex justify-center items-end bg-white p-4 shadow-md border-solid border-gray-200 border-t">
+      <div className="fixed bottom-0 w-full flex items-stretch shadow-lg bg-[#EA906C]">
         <button
-          className="text-xl flex-grow"
+          className="flex-grow flex justify-center items-center p-3 hover:bg-gray-200"
           onClick={() => {
             setCurrentTab('status')
           }}
         >
-          🌐
+          <LuNetwork className="text-xl" /> {/* Network Icon */}
         </button>
+
         <button
-          className="text-3xl text-red-500 mx-4 flex-grow"
+          className="flex-grow flex justify-center items-center p-3 text-red-800 hover:bg-gray-200"
           onClick={() => {
             setCurrentTab('main')
           }}
         >
-          ⭕
+          <FiCircle className="text-xl" /> {/* Circle Icon */}
         </button>
         <button
-          className="text-3xl flex-grow"
+          className="flex-grow flex justify-center items-center p-3 hover:bg-gray-200"
           onClick={() => {
             setCurrentTab('config')
           }}
         >
-          ⚙
+          <FiSettings className="text-xl" /> {/* Settings Icon */}
         </button>
       </div>
     )
   }
+
   const ConnectStatus = () => {
+    const status = useContext(RingsContext)
     return (
-      <div className="p-4 relative">
+      <div className="p-4 relative text-#EA906C">
         <div className="text-center text-lg font-bold mb-4">
           <span>Status</span>
         </div>
@@ -355,13 +387,13 @@ export const Status = ({
       </div>
     )
   }
-
+  console.log('rerender status')
   return (
-    <div className="w-358px h-550px flex-col-center font-pixel antialiased">
+    <div className="w-358px h-550px flex-col-center font-pixel antialiased bg-#2B2A4C">
       <div className="w-full h-full">
         <Nav />
-        {currentTab === 'main' && <RingsBtn clients={clients} />}
-        {currentTab === 'config' && <ConfigFields />}
+        {currentTab === 'main' && <RingsBtn clients={clients} ringsBtnCallback={ringsBtnCallback} />}
+        {currentTab === 'config' && <ConfigFields canChange={clients.length > 0 ? false : true} configUrls={urls} />}
         {currentTab === 'status' && <ConnectStatus />}
         <TabBar />
       </div>
