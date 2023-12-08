@@ -14,14 +14,14 @@ const RingsContext = React.createContext<Record<string, any>>({})
 export function App() {
   const { address } = useAccount()
   const { connectors, connectAsync } = useConnect()
-  const [clients, setClients] = useState<any[]>([])
+  const [providers, setProviders] = useState<any[]>([])
   const [ringsStatus, setRingsStatus] = useState<Record<string, any>>({})
 
   useEffect(() => {
-    // get client from background
+    // get provider from background
     ;(async () => {
-      const data = await sendMessage('get-client', null)
-      setClients(data.clients)
+      const data = await sendMessage('get-provider', null)
+      setProviders(data.providers)
     })()
 
     // handle sign messge from background
@@ -65,7 +65,7 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const createClient = useCallback(async () => {
+  const createProvider = useCallback(async () => {
     if (loading) return
     try {
       let address_ = address
@@ -83,7 +83,7 @@ export function App() {
           ..._urls,
         })
 
-        setClients(data.clients)
+        setProviders(data.providers)
       }
     } catch (error) {
       console.error(error)
@@ -94,17 +94,17 @@ export function App() {
   }, [address, connectAsync, connectors, loading, urls])
 
   const connectHandler = useCallback(async () => {
-    if (!clients.length) {
-      await createClient()
+    if (!providers.length) {
+      await createProvider()
     }
-  }, [clients, createClient])
+  }, [providers, createProvider])
 
   const connectSeed = useCallback(async () => {
     if (loading) return
     setLoading(true)
     try {
-      if (!clients.length) {
-        await createClient()
+      if (!providers.length) {
+        await createProvider()
       }
       console.log('connecting seed node')
       await sendMessage('connect-node', { url: urls.nodeUrl })
@@ -115,15 +115,15 @@ export function App() {
     } finally {
       setLoading(false)
     }
-  }, [loading, urls, clients, createClient])
+  }, [loading, urls, providers, createProvider])
 
-  const destroyClient = useCallback(async () => {
-    if (!clients.length) {
+  const destroyProvider = useCallback(async () => {
+    if (!providers.length) {
       return
     }
     setLoading(true)
-    setClients([])
-    await sendMessage('destroy-client', null)
+    setProviders([])
+    await sendMessage('destroy-provider', null)
     console.log('set', ringsStatus.version)
     let newStatus_ = {}
     if (ringsStatus.version) {
@@ -131,7 +131,7 @@ export function App() {
     }
     setRingsStatus(newStatus_)
     setLoading(false)
-  }, [clients, ringsStatus])
+  }, [providers, ringsStatus])
 
   return new URLSearchParams(location.search).get('notification') ? (
     <NotificationPage connectHandler={connectHandler} loading={loading} />
@@ -140,16 +140,16 @@ export function App() {
       <Status
         urls={urls}
         setUrls={setUrls}
-        clients={clients}
+        providers={providers}
         connectHandler={connectHandler}
         loading={loading}
-        destroyClient={destroyClient}
+        destroyProvider={destroyProvider}
         ringsBtnCallback={async () => {
-          console.log('click', clients.length)
-          if (!clients.length) {
+          console.log('click', providers.length)
+          if (!providers.length) {
             connectSeed()
           } else {
-            destroyClient()
+            destroyProvider()
           }
         }}
       />

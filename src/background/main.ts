@@ -1,6 +1,6 @@
 import init, {
-  Client,
-  MessageCallbackInstance,
+  Provider,
+  BackendContext,
   debug
 } from '@ringsnetwork/rings-node'
 
@@ -38,8 +38,8 @@ function toggleIcon(type = 'active') {
 }
 
 let wasmInit: any = null
-let currentClient: Client | null = null
-let clients: Client[] = []
+let currentProvider: Provider | null = null
+let providers: Provider[] = []
 let currentAccount: string | undefined
 let serviceNodes = new Map<string, any[]>()
 
@@ -64,10 +64,31 @@ const requestHandlerMap: Record<string, any> = {
 }
 
 // create callback for handle custom message
-const gen_callback = (): MessageCallbackInstance => {
-  return new MessageCallbackInstance(
-    // custom message
-    async (response: any, message: any) => {
+const gen_callback = (): BackendContext => {
+  return new BackendContext(
+    // service message handler
+    async (provider: any, response: any, message: any) => {
+      const { tx_id } = response
+      if (messageStatusMap.get(tx_id) === 'pending' && message) {
+        const { body, headers, ...rest }: { body: any; headers: Map<string, string> } = message
+        const parsedHeaders: { [key: string]: string } = {}
+
+        for (const [key, value] of headers.entries()) {
+          parsedHeaders[key] = value
+        }
+
+        const parsedBody = new TextDecoder().decode(new Uint8Array(body))
+
+        console.log(`parsed`, { ...rest, headers: parsedHeaders, body: parsedBody })
+
+        messageStatusMap.set(
+          tx_id,
+          JSON.stringify({ ...rest, headers: parsedHeaders, body: parsedBody, rawBody: body })
+        )
+      }
+    },
+    // plaintext message handler
+    async (provider: any, response: any, message: any) => {
       console.group('on custom message')
       const { relay } = response
       console.log(`relay`, relay)
@@ -89,41 +110,21 @@ const gen_callback = (): MessageCallbackInstance => {
         },
       })
     },
-    // http response message
-    async (response: any, message: any) => {
-      const { tx_id } = response
-      if (messageStatusMap.get(tx_id) === 'pending' && message) {
-        const { body, headers, ...rest }: { body: any; headers: Map<string, string> } = message
-        const parsedHeaders: { [key: string]: string } = {}
 
-        for (const [key, value] of headers.entries()) {
-          parsedHeaders[key] = value
-        }
-
-        const parsedBody = new TextDecoder().decode(new Uint8Array(body))
-
-        console.log(`parsed`, { ...rest, headers: parsedHeaders, body: parsedBody })
-
-        messageStatusMap.set(
-          tx_id,
-          JSON.stringify({ ...rest, headers: parsedHeaders, body: parsedBody, rawBody: body })
-        )
-      }
-    },
     async (relay: any, prev: String) => { }
   )
 }
 
 
-onMessage('get-client', async () => {
+onMessage('get-provider', async () => {
   return {
-    clients,
+    providers,
     currentAccount,
   }
 })
 
-onMessage('destroy-client', () => {
-  destroyClient()
+onMessage('destroy-provider', () => {
+  destroyProvider()
   toggleIcon('waiting')
 })
 
@@ -135,12 +136,12 @@ onMessage('get-peers', async () => {
 onMessage('request-handler', async ({ data }) => {
   const { requestId, method, params } = data
 
-  if (!currentClient) return {
+  if (!currentProvider) return {
     success: false,
     requestId,
   }
 
-  let client_ = currentClient;
+  let provider_ = currentProvider;
   if (method && requestHandlerMap[method]) {
     try {
       const data = await requestHandlerMap[method](params)
@@ -156,7 +157,7 @@ onMessage('request-handler', async ({ data }) => {
 
   if (method) {
     try {
-      const resp = await client_?.request(method, params)
+      const resp = await provider_?.request(method, params)
       return {
         success: true,
         requestId,
@@ -174,32 +175,32 @@ onMessage('request-handler', async ({ data }) => {
   }
 })
 
-// init background client
+// init background provider
 onMessage('init-background', async ({ data }) => {
-  if (currentClient) {
+  if (currentProvider) {
     return {
-      clients,
-      address: currentClient!.address,
+      providers,
+      address: currentProvider!.address,
     }
   }
-  const client_ = await createRingsNodeClient(data)
-  await client_?.listen()
+  const provider_ = await createRingsNodeProvider(data)
+  await provider_?.listen()
   await statusWatcher()
   toggleIcon('active')
   return {
-    clients,
-    address: client_!.address,
+    providers,
+    address: provider_!.address,
   }
 })
 
 // connect node seed
 onMessage("connect-node", async ({ data }) => {
-  if (!currentClient) return
-  let client_ = currentClient;
+  if (!currentProvider) return
+  let provider_ = currentProvider;
   try {
     const promises = data.url.split(';').map(async (url: string) => {
 
-      return await client_?.connect_peer_via_http(url)
+      return await provider_?.connect_peer_via_http(url)
 
     })
     await Promise.any(promises)
@@ -226,35 +227,35 @@ async function setUrls(urls: { turnUrl: string; nodeUrl: string }) {
 }
 
 /**
- * client instance methods
+ * provider instance methods
  */
 
 async function fetchPeers(): Promise<Peer[]> {
-  if (!currentClient) return []
-  return await currentClient.list_peers()
+  if (!currentProvider) return []
+  return await currentProvider.list_peers()
 }
 
 async function sendRingsMessage(to: string, message: string) {
-  if (currentClient) {
-    return await currentClient.send_message(to, new TextEncoder().encode(message))
+  if (currentProvider) {
+    return await currentProvider.send_message(to, new TextEncoder().encode(message))
   }
 }
 
 async function connectByAddress(address: string) {
-  if (currentClient && currentAccount) {
-    return await currentClient.connect_with_address(address, getAddressWithType(currentAccount).type)
+  if (currentProvider && currentAccount) {
+    return await currentProvider.connect_with_address(address, getAddressWithType(currentAccount).type)
   }
 }
 
 async function disconnect(address: string, addr_type?: ADDRESS_TYPE) {
-  if (currentClient && address) {
-    return await currentClient.disconnect(address, addr_type)
+  if (currentProvider && address) {
+    return await currentProvider.disconnect(address, addr_type)
   }
 }
 
 async function getNodeInfo() {
-  if (currentClient) {
-    return await currentClient.get_node_info()
+  if (currentProvider) {
+    return await currentProvider.get_node_info()
   }
 }
 
@@ -266,7 +267,7 @@ function invokeFindServiceNode(serviceType = 'ipfs_provider', duration = 3000) {
   const timer = setInterval(() => {
     console.log('findServiceNode', serviceNodes.get(serviceType))
 
-    if (serviceNodes.get(serviceType)?.length || !currentClient) {
+    if (serviceNodes.get(serviceType)?.length || !currentProvider) {
       clearInterval(timer)
       return
     }
@@ -275,8 +276,8 @@ function invokeFindServiceNode(serviceType = 'ipfs_provider', duration = 3000) {
 }
 
 async function findServiceNode(serviceType = 'ipfs_provider') {
-  if (currentClient && !serviceNodes.get(serviceType)?.length) {
-    const nodes = await currentClient.lookup_service(serviceType)
+  if (currentProvider && !serviceNodes.get(serviceType)?.length) {
+    const nodes = await currentProvider.lookup_service(serviceType)
     serviceNodes.set(serviceType, nodes)
 
     if (nodes && nodes.length) {
@@ -292,10 +293,10 @@ function getServiceNodes(serviceType = 'ipfs_provider') {
 }
 
 async function asyncSendMessage(message: HttpMessageProps) {
-  if (!currentClient) return Promise.reject('Not Connected to Node')
+  if (!currentProvider) return Promise.reject('Not Connected to Node')
 
   const { destination, method, path, headers } = message
-  const txId = (await currentClient.send_http_request(
+  const txId = (await currentProvider.send_http_request(
     destination,
     'ipfs',
     method,
@@ -333,18 +334,18 @@ async function asyncSendMessage(message: HttpMessageProps) {
 }
 
 /**
- * client methods
+ * provider methods
  */
 
-async function destroyClient() {
-  if (currentClient) {
-    await currentClient.disconnect_all()
-    clients.includes(currentClient) &&
-      clients.splice(
-        clients.findIndex((c) => currentClient === c),
+async function destroyProvider() {
+  if (currentProvider) {
+    await currentProvider.disconnect_all()
+    providers.includes(currentProvider) &&
+      providers.splice(
+        providers.findIndex((c) => currentProvider === c),
         1
       )
-    currentClient = null
+    currentProvider = null
     clearInterval(watcherId)
     watcherId = null;
   }
@@ -356,16 +357,16 @@ async function destroyClient() {
   serviceNodes.clear()
 
   disconnected()
-  console.log("successfully destory client")
+  console.log("successfully destory provider")
 }
 
 async function statusWatcher() {
   let interval = 1000
   watcherId = setInterval(() => {
-    if (!currentClient) return
-    let client_ = currentClient;
+    if (!currentProvider) return
+    let provider_ = currentProvider;
     (async () => {
-      const status = await client_?.request('nodeInfo', []);
+      const status = await provider_?.request('nodeInfo', []);
       if (status !== undefined) {
         try {
           await sendMessage("node-status-change", status!, "popup");
@@ -377,7 +378,7 @@ async function statusWatcher() {
 }
 
 
-async function createRingsNodeClient({
+async function createRingsNodeProvider({
   turnUrl,
   account,
   nodeUrl,
@@ -388,7 +389,7 @@ async function createRingsNodeClient({
 }) {
   try {
     console.log(turnUrl, nodeUrl, account)
-    if (currentClient && currentAccount === account) {
+    if (currentProvider && currentAccount === account) {
       return
     }
     // init wasm
@@ -415,7 +416,7 @@ async function createRingsNodeClient({
       return new Uint8Array(hexToBytes(signed));
     }
     let callback = gen_callback()
-    let client_: Client = await new Client(
+    let provider_: Provider = await new Provider(
       // ice_servers
       turnUrl,
       // stable_timeout
@@ -429,11 +430,11 @@ async function createRingsNodeClient({
       // callback
       callback
     )
-    console.log("successfully created client")
+    console.log("successfully created provider")
     currentAccount = account
-    currentClient = client_
-    clients.push(client_)
-    return client_
+    currentProvider = provider_
+    providers.push(provider_)
+    return provider_
   } catch (e) {
     console.error(e)
   }
