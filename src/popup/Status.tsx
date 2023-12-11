@@ -13,10 +13,10 @@ import { load } from './loader'
 export const Status = ({
   urls,
   setUrls,
-  clients,
+  providers,
   connectHandler,
   loading,
-  destroyClient,
+  destroyProvider,
   ringsBtnCallback,
 }: {
   urls: {
@@ -24,10 +24,10 @@ export const Status = ({
     nodeUrl: string
   }
   setUrls: ({ turnUrl, nodeUrl }: { turnUrl?: string | undefined; nodeUrl?: string | undefined }) => Promise<void>
-  clients: any[]
+  providers: any[]
   connectHandler: () => Promise<void>
   loading: boolean
-  destroyClient: () => Promise<void>
+  destroyProvider: () => Promise<void>
   ringsBtnCallback: () => Promise<void>
 }) => {
   const { connect, connectors, isLoading, pendingConnector } = useConnect()
@@ -185,20 +185,20 @@ export const Status = ({
         <div className="p-2.5 flex items-center justify-between text-xs border-solid border-b border-gray-300">
           <span className={`scale-80 origin-left`}>
             Network Status:{' '}
-            <span className={`${clients.length ? 'text-#15CD96' : 'text-#fb7185 '}`}>
+            <span className={`${providers.length ? 'text-#15CD96' : 'text-#fb7185 '}`}>
               {connectedNodeStatus(status)}
             </span>
           </span>
           <span
             className="flex-1 text-right scale-80 origin-right cursor-pointer transition-all hover:translate-x-.25 underline underline-current"
             onClick={async () => {
-              if (clients.length > 0) {
-                await destroyClient()
+              if (providers.length > 0) {
+                await destroyProvider()
                 setShowModal(false)
               }
             }}
           >
-            {clients.length ? `offline` : '--'}
+            {providers.length ? `offline` : '--'}
           </span>
         </div>
         <div className="flex-1">
@@ -273,7 +273,7 @@ export const Status = ({
         <div className="relative ml-2.5 w-7 h-7 flex-col-center border-angle">
           <span
             className={`absolute w-6 h-6 cursor-pointer transition-all ${
-              clients.length ? 'text-red i-eos-icons:molecules' : 'text-gray i-eos-icons:molecules-outlined'
+              providers.length ? 'text-red i-eos-icons:molecules' : 'text-gray i-eos-icons:molecules-outlined'
             } ${loading ? 'scale-x-0' : ''}`}
             onClick={() => {
               setShowModal(!showModal)
@@ -290,12 +290,12 @@ export const Status = ({
   }
 
   const RingsBtn = React.memo(
-    ({ clients, ringsBtnCallback }: { clients: any[]; ringsBtnCallback: () => Promise<void> }) => {
+    ({ providers, ringsBtnCallback }: { providers: any[]; ringsBtnCallback: () => Promise<void> }) => {
       return (
         <div>
           <CircProgressBar
             labels={[]}
-            index={clients.length}
+            index={providers.length}
             lineLength={50}
             segmentProportion={0.3} // For example, 60% of the line is the first segment
             onClick={ringsBtnCallback}
@@ -392,8 +392,8 @@ export const Status = ({
     <div className="w-358px h-550px flex-col-center font-pixel antialiased bg-#2B2A4C">
       <div className="w-full h-full">
         <Nav />
-        {currentTab === 'main' && <RingsBtn clients={clients} ringsBtnCallback={ringsBtnCallback} />}
-        {currentTab === 'config' && <ConfigFields canChange={clients.length > 0 ? false : true} configUrls={urls} />}
+        {currentTab === 'main' && <RingsBtn providers={providers} ringsBtnCallback={ringsBtnCallback} />}
+        {currentTab === 'config' && <ConfigFields canChange={providers.length > 0 ? false : true} configUrls={urls} />}
         {currentTab === 'status' && <ConnectStatus />}
         <TabBar />
       </div>

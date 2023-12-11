@@ -14,15 +14,15 @@ declare module 'webext-bridge' {
       },
       {
         address: string
-        clients: any[]
+        providers: any[]
       }
     >
     'connect-node': ProtocolWithReturn<{ url: string }, any>
     'sign-message': ProtocolWithReturn<{ auth: string }, { signed: string }>
-    'get-client': ProtocolWithReturn<
+    'get-provider': ProtocolWithReturn<
       any,
       {
-        clients: any[]
+        providers: any[]
         currentAccount: string | undefined
       }
     >
@@ -39,7 +39,7 @@ declare module 'webext-bridge' {
       } & Record<string, any>
     >
     'node-status-change': ProtocolWithReturn<Record<string, any>, any>
-    'destroy-client': any
+    'destroy-provider': any
     'get-peers': ProtocolWithReturn<any, any>
     getWindowInfo: ProtocolWithReturn<
       any,
